@@ -1,0 +1,14 @@
+{
+    "manifest_version": "1",
+    "theme_color": "black",
+    "name": "Restaurant Reviews App",
+    "short_name": "Restaurant Reviews",
+    "display": "standalone",
+    "orientation": "landscape",
+    "version": "v1.0",
+    "default_locale": "en",
+    "description": "Restaurant Review Application",
+    "author": "avilde< Andris Vilde 'vilde.andris@gmail.com>'",
+    "homepage_url": "/index.html",
+    "offline_enabled": true
+}
