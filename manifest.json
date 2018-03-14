@@ -1,8 +1,8 @@
 {
     "manifest_version": "1",
     "theme_color": "black",
-    "name": "Restaurant Reviews App",
-    "short_name": "Restaurant Reviews",
+    "name": "Restaurant Reviews",
+    "short_name": "RR",
     "display": "standalone",
     "orientation": "landscape",
     "version": "v1.0",
@@ -10,5 +10,13 @@
     "description": "Restaurant Review Application",
     "author": "avilde< Andris Vilde 'vilde.andris@gmail.com>'",
     "homepage_url": "/index.html",
-    "offline_enabled": true
+    "offline_enabled": true,
+    "icons": {
+        "16": "img/app-logo16.png",
+        "48": "img/app-logo48.png",
+        "64": "img/app-logo64.png",
+        "128": "img/app-logo128.png",
+        "256": "img/app-logo256.png",
+        "512": "img/app-logo512.png"
+    }
 }
