@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="black">
+  <meta charset="utf-8">
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <link rel="stylesheet" href="css/styles.css" type="text/css">
   <title>Restaurant Info</title>
@@ -15,13 +17,13 @@
     <nav>
       <h1>
         <img class="app-logo" src="img/app-logo64.png" alt="Restaurant Reviews Logo">
-        <a href="/">Restaurant Reviews</a>
+        <a href="/" role="link" rel="noopener">Restaurant Reviews</a>
       </h1>
     </nav>
 
-    <ul id="breadcrumb">
+    <ul id="breadcrumb" aria-label="Restaurant breadcrumb">
       <li>
-        <a href="/">Home</a>
+        <a href="/" rel="noopener" role="link">Home</a>
       </li>
     </ul>
   </header>
@@ -37,7 +39,7 @@
 
     <section id="map-container" class="section-container map">
       <h1 class="section-title">Map</h1>
-      <div id="map"></div>
+      <div id="map" role="application" aria-label="Google map for restaurant location"></div>
     </section>
 
     <section id="reviews-container" class="section-container reviews">
@@ -47,7 +49,7 @@
 
   <footer id="footer">
     Copyright (c) 2017
-    <a href="/">
+    <a href="/" role="link" rel="noopener">
       <strong>Restaurant Reviews</strong>
     </a> All Rights Reserved.
   </footer>

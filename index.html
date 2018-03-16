@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="black">
+  <meta charset="utf-8">
   <link rel="stylesheet" src="//normalize-css.googlecode.com/svn/trunk/normalize.css" />
   <link rel="stylesheet" href="css/styles.css" type="text/css">
   <link rel="manifest" href="/manifest.json">
@@ -14,26 +16,25 @@
     <nav>
       <h1>
         <img class="app-logo" src="img/app-logo64.png" alt="Restaurant Reviews Logo">
-        <a href="/" rel="noopener">Restaurant Reviews</a>
+        <a href="/" rel="noopener" role="link">Restaurant Reviews</a>
       </h1>
     </nav>
   </header>
 
   <main id="maincontent">
     <section id="map-container">
-      <div id="map"></div>
+      <div id="map" role="application" aria-label="Google map for finding restaurants"></div>
     </section>
 
     <section>
       <div class="filter-options">
         <h2>Filter Results</h2>
-
-        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()">
-          <option value="all">All Neighborhoods</option>
+        <select id="neighborhoods-select" name="neighborhoods" onchange="updateRestaurants()" role="listbox" aria-label="Choose neighborhood">
+          <option value="all" role="option" aria-selected="true">All Neighborhoods</option>
         </select>
 
-        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()">
-          <option value="all">All Cuisines</option>
+        <select id="cuisines-select" name="cuisines" onchange="updateRestaurants()" role="listbox" aria-label="Choose restaurant">
+          <option value="all" role="option" aria-selected="true">All Cuisines</option>
         </select>
       </div>
 
@@ -44,7 +45,7 @@
 
   <footer id="footer">
     Copyright (c) 2017
-    <a href="/" rel="noopener">
+    <a href="/" rel="noopener" role="link">
       <strong>Restaurant Reviews</strong>
     </a> All Rights Reserved.
   </footer>
