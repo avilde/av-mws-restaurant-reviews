@@ -13,8 +13,8 @@
   Javascript must be enabled
 </noscript>
 <body class="inside">
-  <header>
-    <nav>
+  <header role="banner">
+    <nav role="navigation">
       <h1>
         <img class="app-logo" src="img/app-logo64.png" alt="Restaurant Reviews Logo">
         <a href="/" role="link" rel="noopener">Restaurant Reviews</a>
@@ -28,13 +28,13 @@
     </ul>
   </header>
 
-  <main id="maincontent">
+  <main id="maincontent" role="main">
     <section id="restaurant-container" class="section-container restaurant">
       <h1 class="section-title" id="restaurant-name"></h1>
       <img id="restaurant-img">
-      <p id="restaurant-cuisine"></p>
-      <p id="restaurant-address"></p>
-      <table id="restaurant-hours"></table>
+      <p id="restaurant-cuisine" aria-label="Cuisine"></p>
+      <p id="restaurant-address" aria-label="Address"></p>
+      <table id="restaurant-hours" aria-label="Restaurant Hours"></table>
     </section>
 
     <section id="map-container" class="section-container map">
@@ -43,11 +43,11 @@
     </section>
 
     <section id="reviews-container" class="section-container reviews">
-      <ul id="reviews-list"></ul>
+      <ul id="reviews-list" aria-label="Reviews list"></ul>
     </section>
   </main>
 
-  <footer id="footer">
+  <footer id="footer" role="contentinfo">
     Copyright (c) 2017
     <a href="/" role="link" rel="noopener">
       <strong>Restaurant Reviews</strong>
