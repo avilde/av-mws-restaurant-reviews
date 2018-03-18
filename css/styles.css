@@ -80,6 +80,23 @@ section {
   text-transform: uppercase;
 }
 
+div.author {
+  font-size: 10px;
+  border-top: 1px solid #696868;
+  padding-top: 10px;
+  margin: 5px 50px 0 50px;
+}
+
+div.author > span.made-by {
+  text-transform: initial;
+  padding-right: 5px;
+}
+
+div.author > span.author-name {
+  color: #3397db;
+  font-weight: bold;
+}
+
 @media screen and (max-width: 740px) {
   #footer {
     padding: 10px;
@@ -196,7 +213,7 @@ nav h1 img.app-logo {
   font-family: Arial, sans-serif;
   margin: 15px;
   min-height: 380px;
-  padding: 0 30px 25px;
+  padding: 0 20px 25px 20px;
   text-align: left;
   width: 270px;
 }
@@ -234,11 +251,16 @@ nav h1 img.app-logo {
   display: inline-block;
   align-self: center;
   font-size: 10pt;
-  margin: 15px 20px 0;
+  margin-top: 15px;
   padding: 8px 30px 10px;
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
+}
+
+#restaurants-list li a:hover {
+  background-color: lightgray;
+  color: #0275d8;
 }
 
 @media screen and (max-width: 740px) {
@@ -252,7 +274,6 @@ nav h1 img.app-logo {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 10px;
-    padding: 10px;
     min-height: 50%;
     min-width: 80vw;
   }
@@ -260,10 +281,6 @@ nav h1 img.app-logo {
   #restaurants-list .restaurant-img {
     min-width: 50%;
     min-height: 50%;
-  }
-
-  #restaurants-list li a {
-    margin: 10px;
   }
 }
 
@@ -294,7 +311,7 @@ nav h1 img.app-logo {
 #breadcrumb li + li:before {
   padding: 8px;
   color: black;
-  content: "/\00a0";
+  content: '/\00a0';
 }
 
 #breadcrumb li a {
@@ -424,20 +441,40 @@ nav h1 img.app-logo {
 
 #reviews-list li {
   background-color: #fff;
-  border: 2px solid #f3f3f3;
+  border: 1px solid lightblue;
   display: block;
   list-style-type: none;
   margin-bottom: 30px;
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;
-  padding: 0 20px 20px;
   position: relative;
   width: 95%;
+  padding: 8px;
 }
 
-#reviews-list li p {
-  margin: 0 0 10px;
+p.review-name {
+  padding-left: 10px;
+  width: 100%;
+  background-color: #58a0ff;
+  font-weight: bold;
+}
+
+span.review-date {
+  font-size: 0.8em;
+  color: white;
+  font-weight: normal;
+  padding-left: 20px;
+}
+
+p.rating span {
+  color: #58a0ff;
+}
+
+@media screen and (max-width: 740px) {
+  #reviews-list li p {
+    font-size: 1.1em;
+  }
 }
 
 #restaurant-hours td {
