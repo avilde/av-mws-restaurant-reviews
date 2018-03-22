@@ -1,3 +1,4 @@
+import { DBHelper } from './utils/dbhelper.js';
 let restaurants, neighborhoods, cuisines, map, markers = [];
 
 /**

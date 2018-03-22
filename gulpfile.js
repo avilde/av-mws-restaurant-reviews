@@ -4,7 +4,7 @@ const cfg = {
     root: 'src/root/',
     dest: 'dist/',
     sourceCss: `src/scss/**/*.scss`,
-    sourceJs: `src/js/**/*.js`,
+    sourceJs: `src/js/*.js`,
     sourceImg: `src/img/**/*.*`,
     destCss: `dist/css`,
     destJs: `dist/js`,
@@ -66,13 +66,19 @@ gulp.task('sass', () => {
 gulp.task('scripts', () => {
     return gulp.src(cfg.sourceJs)
         .pipe(babel({
-            presets: ['env']
+            presets: [
+                ['env', {
+                    'targets': {
+                        'uglify': false,
+                        'browsers': ['last 2 versions', 'safari >= 7'],
+                        'node': '9.3.0'
+                    }
+                }]
+            ]
         }))
-        .pipe(uglify({
-            compress: true,
-            mangle: true
+        .pipe(rename((path) => {
+            path.basename += '.min';
         }))
-        .pipe(concat(cfg.jsAllMinified))
         .on('error', err => {
             util.log(util.colors.red('[Error]'), err.toString());
         })
