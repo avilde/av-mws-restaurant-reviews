@@ -1,6 +1,4 @@
-let restaurants, neighborhoods, cuisines;
-var map;
-var markers = [];
+let restaurants, neighborhoods, cuisines, map, markers = [];
 
 /**
  * Register service worker for caching static assets

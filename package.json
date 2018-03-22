@@ -1,0 +1,37 @@
+{
+  "name": "gulp-auto-tools",
+  "version": "1.0.0",
+  "description": "AV - Restaurant Reviews",
+  "main": "gulpfile.js",
+  "scripts": {
+    "build": "build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/avilde/mws-restaurant-stage-1.git"
+  },
+  "keywords": [
+    "gulp"
+  ],
+  "author": "avilde [Andris Vilde <vilde.andris@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/avilde/mws-restaurant-stage-1/issues"
+  },
+  "homepage": "https://github.com/avilde/mws-restaurant-stage-1#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.1",
+    "gulp-clean": "^0.4.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-eslint": "^4.0.2",
+    "gulp-imagemin": "^4.1.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^3.1.0",
+    "gulp-uglify": "^3.0.0",
+    "gulp-util": "^3.0.8"
+  },
+  "dependencies": {}
+}

@@ -1,5 +1,4 @@
-let restaurant;
-var map;
+let restaurant, map;
 
 /**
  * Register service worker for caching static assets
