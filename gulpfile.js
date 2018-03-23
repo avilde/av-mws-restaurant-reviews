@@ -19,6 +19,7 @@ const uglify = require('gulp-uglify');
 const rename = require('gulp-rename');
 const clean = require('gulp-clean');
 const imagemin = require('gulp-imagemin');
+const webp = require('gulp-webp');
 const util = require('gulp-util');
 const browserify = require('browserify');
 const babelify = require('babelify');
@@ -27,7 +28,7 @@ const buffer = require('vinyl-buffer');
 const sourcemaps = require('gulp-sourcemaps');
 const htmlmin = require('gulp-htmlmin');
 
-// cleanup
+// cleanup (remove destination folder)
 gulp.task('clean', (cb) => {
     return gulp.src(cfg.dest, {
             read: false
@@ -35,9 +36,9 @@ gulp.task('clean', (cb) => {
         .pipe(clean());
 });
 
-// linting
+// linting (check errors in js files)
 gulp.task('lint', () => {
-    gulp.src([`${cfg.sourceJs}/**/*.js`, '!node_modules/**'])
+    gulp.src([`${cfg.sourceJs}/**/*.js`])
         .pipe(eslint())
         .pipe(eslint.formatEach('compact', process.stderr))
         .pipe(eslint.results(results => {
@@ -47,16 +48,17 @@ gulp.task('lint', () => {
         }));
 });
 
-// images
+// images to .webp
 gulp.task('images', () => {
     return gulp.src(cfg.sourceImg)
-        .pipe(imagemin({
-            optimizationLevel: 5
+        .pipe(webp({
+            quality: 50,
+            method: 6
         }))
         .pipe(gulp.dest(cfg.destImg));
 });
 
-// pre-processor for CSS
+// pre-processor for CSS (minify too)
 gulp.task('sass', () => {
     return gulp.src(cfg.sourceCss)
         .pipe(sass({
@@ -65,7 +67,7 @@ gulp.task('sass', () => {
         .pipe(gulp.dest(cfg.destCss));
 });
 
-// html files
+// html files (minify HTML files)
 gulp.task('html', function () {
     return gulp.src(`${cfg.src}*.html`)
         .pipe(htmlmin({
@@ -74,20 +76,18 @@ gulp.task('html', function () {
         .pipe(gulp.dest(cfg.dest));
 });
 
-// script files
+// script files (process JS files - minify/uglify/babelify & browserify)
 function bundleJsEntry(inputFiles, src, dest) {
     inputFiles.forEach(function (entry, i, entries) {
         entries.remaining = entries.remaining || entries.length;
 
-        const b = browserify({
-            entries: `${src}/${entry}.js`,
-            debug: true,
-            transform: [babelify.configure({
-                presets: ['es2015']
-            })]
-        });
-
-        b
+        browserify({
+                entries: `${src}/${entry}.js`,
+                debug: true,
+                transform: [babelify.configure({
+                    presets: ['es2015']
+                })]
+            })
             .bundle()
             .pipe(source(`${entry}.js`))
             .pipe(buffer())
@@ -105,32 +105,31 @@ gulp.task('bundle-js', () => {
         'restaurant_list',
         'restaurant_details'
     ], cfg.sourceJs, cfg.destJs);
+    bundleJsEntry(['sw'], cfg.src, cfg.dest);
 });
 
-// root files
+// process root files
 gulp.task('root-files', () => {
-    bundleJsEntry(['sw'], cfg.src, cfg.dest);
-
-    return gulp.src([
-            'manifest.json',
-            'favicon.ico'
-        ], {
-            base: cfg.src
-        })
+    gulp.src([
+            `${cfg.src}manifest.json`,
+            `${cfg.src}favicon.ico`
+        ])
         .pipe(gulp.dest(cfg.dest));
 });
-
-// ------------ MAIN ------------
 
 // watch source files
 gulp.task('watch', () => {
     gulp.watch(cfg.sourceJs, ['lint', 'scripts']);
     gulp.watch(cfg.sourceCss, ['sass']);
 });
-// build distibrutable code
-gulp.task('build', ['clean'], () => {
-    gulp.start('post-cleanup');
-});
 
 // make cleanup synchronous
 gulp.task('post-cleanup', ['lint', 'images', 'sass', 'html', 'bundle-js', 'root-files']);
+
+/**
+ *  [ BUILD ]
+ *  build distibrutable code
+ */
+gulp.task('build', ['clean'], () => {
+    gulp.start('post-cleanup');
+});
