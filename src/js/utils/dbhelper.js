@@ -1,7 +1,7 @@
 /**
  * Common database helper functions.
  */
-export default class DBHelper {
+class DBHelper {
 
   /**
    * Database URL.
@@ -141,7 +141,7 @@ export default class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`dist/img/${restaurant.photograph}.webp`);
+    return (`img/${restaurant.photograph}.webp`);
   }
 
   /**
@@ -159,3 +159,5 @@ export default class DBHelper {
   }
 
 }
+
+module.exports = DBHelper;

@@ -1,11 +1,12 @@
-import { DBHelper } from './utils/dbhelper.js';
+require('./utils/dbhelper');
+
 let restaurant, map;
 
 /**
  * Register service worker for caching static assets
  */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js', { scope: './' });
+  navigator.serviceWorker.register('sw.js', { scope: './' });
 }
 
 /**
