@@ -1,14 +1,4 @@
-require('./utils/dbhelper');
-
 let restaurant, map;
-
-/**
- * Register service worker for caching static assets
- */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js', { scope: './' });
-}
-
 /**
  * Initialize Google map, called from HTML.
  */

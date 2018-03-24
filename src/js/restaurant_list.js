@@ -1,6 +1,8 @@
-require('./utils/dbhelper');
-
-let restaurants, neighborhoods, cuisines, map, markers = [];
+let restaurants,
+  neighborhoods,
+  cuisines,
+  map,
+  markers = [];
 
 /**
  * Register service worker for caching static assets
@@ -15,7 +17,23 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
   fetchCuisines();
+  //addGoogleMap();
 });
+
+addGoogleMap = () => {
+  return new Promise((resolve, reject) => {
+    let loc = {
+      lat: 40.722216,
+      lng: -73.987501
+    };
+    self.map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 12,
+      center: loc,
+      scrollwheel: false
+    });
+    updateRestaurants();
+  });
+};
 
 /**
  * Fetch all neighborhoods and set their HTML.
@@ -78,16 +96,19 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
  * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
-  let loc = {
-    lat: 40.722216,
-    lng: -73.987501
-  };
-  self.map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 12,
-    center: loc,
-    scrollwheel: false
+  return new Promise((resolve, reject) => {
+    let loc = {
+      lat: 40.722216,
+      lng: -73.987501
+    };
+    self.map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 12,
+      center: loc,
+      scrollwheel: false
+    });
+
+    resolve(updateRestaurants());
   });
-  updateRestaurants();
 };
 
 /**
@@ -128,8 +149,10 @@ resetRestaurants = restaurants => {
   ul.innerHTML = '';
 
   // Remove all map markers
-  self.markers.forEach(m => m.setMap(null));
-  self.markers = [];
+  if (self.markers && self.markers.length > 0) {
+    self.markers.forEach(m => m.setMap(null));
+    self.markers = [];
+  }
   self.restaurants = restaurants;
 };
 
@@ -153,7 +176,9 @@ createRestaurantHTML = restaurant => {
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
-  image.alt = `Restaurant ${restaurant.name} - cuisine ${restaurant.cuisine_type}`;
+  image.alt = `Restaurant ${restaurant.name} - cuisine ${
+    restaurant.cuisine_type
+  }`;
   li.append(image);
 
   const name = document.createElement('h2');
@@ -187,6 +212,6 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     google.maps.event.addListener(marker, 'click', () => {
       window.location.href = marker.url;
     });
-    self.markers.push(marker);
+    if (self.markers) self.markers.push(marker);
   });
 };

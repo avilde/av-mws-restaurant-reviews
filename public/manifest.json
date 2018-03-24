@@ -1,46 +1,45 @@
 {
-    "manifest_version": "1",
-    "start_url": "index.html",
-    "theme_color": "black",
-    "background_color": "white",
-    "name": "Restaurant Reviews",
-    "short_name": "RR",
-    "display": "standalone",
-    "orientation": "portrait",
-    "default_locale": "en",
-    "description": "Restaurant Review Application",
-    "author": "avilde< Andris Vilde 'vilde.andris@gmail.com>'",
-    "offline_enabled": true,
-    "icons": [
-        {
-            "size": "16x16",
-            "type": "image/webp",
-            "src": "img/app-logo16.webp"
-        },
-        {
-            "size": "48x48",
-            "type": "image/webp",
-            "src": "img/app-logo48.webp"
-        },
-        {
-            "size": "64x64",
-            "type": "image/webp",
-            "src": "img/app-logo64.webp"
-        },
-        {
-            "size": "128x128",
-            "type": "image/webp",
-            "src": "img/app-logo128.webp"
-        },
-        {
-            "size": "256x256",
-            "type": "image/webp",
-            "src": "img/app-logo256.webp"
-        },
-        {
-            "size": "512x512",
-            "type": "image/webp",
-            "src": "img/app-logo512.webp"
-        }
-    ]
+  "manifest_version": "1",
+  "start_url": "index.html",
+  "theme_color": "#4559a0",
+  "background_color": "#fff",
+  "name": "Restaurant Reviews",
+  "short_name": "RR",
+  "display": "standalone",
+  "orientation": "portrait",
+  "default_locale": "en",
+  "description": "Restaurant Review Application",
+  "author": "avilde< Andris Vilde 'vilde.andris@gmail.com>'",
+  "icons": [
+    {
+      "sizes": "16x16",
+      "type": "image/webp",
+      "src": "img/app-logo16.webp"
+    },
+    {
+      "sizes": "48x48",
+      "type": "image/webp",
+      "src": "img/app-logo48.webp"
+    },
+    {
+      "sizes": "64x64",
+      "type": "image/webp",
+      "src": "img/app-logo64.webp"
+    },
+    {
+      "sizes": "128x128",
+      "type": "image/webp",
+      "src": "img/app-logo128.webp"
+    },
+    {
+      "sizes": "256x256",
+      "type": "image/webp",
+      "src": "img/app-logo256.webp"
+    },
+    {
+      "sizes": "512x512",
+      "type": "image/webp",
+      "src": "img/app-logo512.webp"
+    }
+  ]
 }
