@@ -17,22 +17,19 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
   fetchCuisines();
-  //addGoogleMap();
+  addGoogleMap();
 });
 
+/**
+ * Async add google map
+ */
 addGoogleMap = () => {
-  return new Promise((resolve, reject) => {
-    let loc = {
-      lat: 40.722216,
-      lng: -73.987501
-    };
-    self.map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 12,
-      center: loc,
-      scrollwheel: false
-    });
-    updateRestaurants();
-  });
+  const API_KEY = 'AIzaSyDRi2AMR_VvvpKmGp448AvanrS9zp_XSNc',
+    script = document.createElement('script');
+
+  script.type = 'text/javascript';
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
+  document.body.appendChild(script);
 };
 
 /**
@@ -96,19 +93,16 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
  * Initialize Google map, called from HTML.
  */
 window.initMap = () => {
-  return new Promise((resolve, reject) => {
-    let loc = {
-      lat: 40.722216,
-      lng: -73.987501
-    };
-    self.map = new google.maps.Map(document.getElementById('map'), {
-      zoom: 12,
-      center: loc,
-      scrollwheel: false
-    });
-
-    resolve(updateRestaurants());
+  let loc = {
+    lat: 40.722216,
+    lng: -73.987501
+  };
+  self.map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 12,
+    center: loc,
+    scrollwheel: false
   });
+  updateRestaurants();
 };
 
 /**
@@ -134,9 +128,22 @@ updateRestaurants = () => {
       } else {
         resetRestaurants(restaurants);
         fillRestaurantsHTML();
+        lazyLoadImages();
       }
     }
   );
+};
+
+/**
+ * Load page images after restaurant DOM has been added
+ */
+lazyLoadImages = () => {
+  [].forEach.call(document.querySelectorAll('img[data-src]'), function(img) {
+    img.setAttribute('src', img.getAttribute('data-src'));
+    img.onload = function() {
+      img.removeAttribute('data-src');
+    };
+  });
 };
 
 /**
@@ -175,7 +182,7 @@ createRestaurantHTML = restaurant => {
 
   const image = document.createElement('img');
   image.className = 'restaurant-img';
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
   image.alt = `Restaurant ${restaurant.name} - cuisine ${
     restaurant.cuisine_type
   }`;
@@ -215,3 +222,10 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     if (self.markers) self.markers.push(marker);
   });
 };
+
+// my signature
+console.log(
+  `%c AV-RR %c Andris Vilde: Restaurant Reviews`,
+  'background: #2196F3; color: #fff; font-size: 12px; border-radius: 3px 0 0 3px; font-family: Tahoma;',
+  'background: #bee1fd; color: #000; font-size: 12px; border-radius: 0 3px 3px 0; font-family: Tahoma;'
+);

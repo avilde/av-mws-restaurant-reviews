@@ -26,9 +26,11 @@
     "gulp-imagemin": "^4.1.0",
     "gulp-rename": "^1.2.2",
     "gulp-sass": "^3.1.0",
+    "gulp-serve": "^1.4.0",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
     "gulp-webp": "^3.0.0",
+    "serve": "^6.5.3",
     "uglify-es": "^3.3.9"
   },
   "dependencies": {}

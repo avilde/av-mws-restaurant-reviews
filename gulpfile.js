@@ -24,6 +24,7 @@ const webp = require('gulp-webp');
 const util = require('gulp-util');
 const sourcemaps = require('gulp-sourcemaps');
 const htmlmin = require('gulp-htmlmin');
+const serve = require('gulp-serve');
 
 // cleanup (remove destination folder)
 gulp.task('clean', cb => {
@@ -162,7 +163,8 @@ gulp.task('post-cleanup', [
   'minify-list',
   'minify-details',
   'minify-sw',
-  'root-files'
+  'root-files',
+  'serve'
 ]);
 
 /**
@@ -172,3 +174,12 @@ gulp.task('post-cleanup', [
 gulp.task('build', ['clean'], () => {
   gulp.start('post-cleanup');
 });
+
+// run localhost server
+gulp.task(
+  'serve',
+  serve({
+    root: ['public'],
+    port: 8000
+  })
+);
