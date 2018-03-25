@@ -1,32 +1,59 @@
 # Mobile Web Specialist Certification Course
----
 #### _Three Stage Course Material Project - Restaurant Reviews_
-
-Initial code owners:
-* @forbiddenvoid @richardkalehoff @asparr
-
-Modified code owner: 
-* avilde <Andris Vilde 'vilde.andris@gmail.com'>
-
+---
 ## Project Overview: Stage 2
 
 For the **Restaurant Reviews** projects, you will incrementally convert a static webpage to a mobile-ready web application. In **Stage One**, you will take a static design that lacks accessibility and convert the design to be responsive on different sized displays and accessible for screen reader use. You will also add a service worker to begin the process of creating a seamless offline experience for your users.
 
-### Specification
 
-You have been provided the code for a restaurant reviews website. The code has a lot of issues. It’s barely usable on a desktop browser, much less a mobile device. It also doesn’t include any standard accessibility features, and it doesn’t work offline at all. Your job is to update the code to resolve these issues while still maintaining the included functionality. 
+## Code Owners
+Initial:
+* @forbiddenvoid @richardkalehoff @asparr
 
-### What do I do from here?
+Modified: 
+* avilde <Andris Vilde 'vilde.andris@gmail.com'>
 
-1. In this folder, start up a simple HTTP server to serve up the site files on your local computer. Python has some simple tools to do this, and you don't even need to know Python. For most people, it's already installed on your computer. 
+## Notes For Reviewer
 
-In a terminal, check the version of Python you have: `python -V`. If you have Python 2.x, spin up the server with `python -m SimpleHTTPServer 8000` (or some other port, if port 8000 is already in use.) For Python 3.x, you can use `python3 -m http.server 8000`. If you don't have Python installed, navigate to Python's [website](https://www.python.org/) to download and install the software.
+* Restructured whole project into `public` and `src` (source) folders where automation tool `gulp` is used to generate resulting application.
 
-2. With your server running, visit the site: `http://localhost:8000`, and look around for a bit to see what the current experience looks like.
-3. Explore the provided code, and make start making a plan to implement the required features in three areas: responsive design, accessibility and offline use.
-4. Write code to implement the updates to get this site on its way to being a mobile-ready website.
+* For serving `public` folder I used `gulp-serve` instead of `python http.server` because when auditing page the python simple HTTP server tends to choke quite often.
 
-### Note about ES6
+* To run `localhost` server with `public` directory files, type:
+```
+gulp serve
+```
 
-Most of the code in this project has been written to the ES6 JavaScript specification for compatibility with modern web browsers and future proofing JavaScript code. As much as possible, try to maintain use of ES6 in any additional JavaScript you write. 
+* To automatically build whole project & run server, type:
+```
+gulp build
+```
 
+* Modifications done to files:
+    * `images` - converted images to .webp + added code to lazy load them
+    * `js` - concatenated, minified, uglified & generated source maps
+    * `html` - minified, inlined basic CSS
+    * `css` - using Sass pre-processor, minified
+    * `manifest` - created application icons
+    * `favicon` - created favorite icon for bookmarks
+    * `service worker` - minified code
+    * `gitignore` - added `node_modules` directory to be ignored
+    * `automation tools` - check `gulpfile.js` for whole configuration
+
+## Lighthouse Results
+>Notes: 
+> * results would have been way better if `Google Maps API` would use properly sized images & latest standarts like .webp, not to mention the time it blocks intereaction
+> * used 4 different audit configurations to test my page
+> * `restaurant.html` (restaurant details) page had similar results therefore have not created extra images and same goes for `Desktop` audit profiles
+
+### 1) mobile - no throttling - clear storage 
+![](./results/mobile-no_throttling-clear_storage.png)
+
+### 2) mobile - no throttling - preserve storage
+![](./results/mobile-no_throttling-preserve_storage.png)
+
+### 3) mobile - slowdown - clear storage 
+![](./results/mobile-slowdown-clear_storage.png)
+
+### 4) mobile - slowdown - preserve storage 
+![](./results/mobile-no_throttling-preserve_storage.png)

@@ -12,19 +12,81 @@ class DBHelper {
   }
 
   /**
+   * database name (= service worker name)
+   */
+  static get DB_NAME() {
+    return 'av-rr';
+  }
+
+  /**
+   * Indexed db store name
+   */
+  static get STORE_NAME() {
+    return 'restaurants';
+  }
+
+  /**
+   * Indexed db version
+   */
+  static get DB_VER() {
+    return 1;
+  }
+
+  /**
+   * Get indexed database promise
+   */
+  static getDb() {
+    return idb.open(DBHelper.DB_NAME, DBHelper.DB_VER, upgrade => {
+      const store = upgrade.createObjectStore(DBHelper.STORE_NAME, {
+        keyPath: 'id'
+      });
+
+      store.createIndex('by-id', 'id');
+    });
+  }
+
+  /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback) {
-    fetch(DBHelper.DATABASE_URL)
-      .then(resp => {
-        if (resp.status !== 200)
-          console.error(
-            `Could not retrieve restaurants data. Status:${response.status}`
-          );
-        else return resp.json();
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
+
+        return db
+          .transaction(DBHelper.STORE_NAME)
+          .objectStore(DBHelper.STORE_NAME)
+          .getAll();
       })
-      .then(restaurants => callback(null, restaurants))
-      .catch(e => console.error(`Request failed. Returned error: ${e}`));
+      .then(data => {
+        if (data && data.length > 0) return callback(null, data);
+        else {
+          // idb restaurant data
+          fetch(DBHelper.DATABASE_URL)
+            .then(resp => {
+              if (resp.status !== 200)
+                console.error(
+                  `Could not retrieve restaurants data. Status:${
+                    response.status
+                  }`
+                );
+              else return resp.json();
+            })
+            .then(restaurants => {
+              DBHelper.getDb().then(db => {
+                if (!db) return;
+
+                const store = db
+                  .transaction(DBHelper.STORE_NAME, 'readwrite')
+                  .objectStore(DBHelper.STORE_NAME);
+
+                restaurants.map(r => store.put(r));
+              });
+              return callback(null, restaurants);
+            })
+            .catch(e => console.error(`Request failed. Returned error: ${e}`));
+        }
+      });
   }
 
   /**
