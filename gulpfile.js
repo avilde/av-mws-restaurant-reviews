@@ -95,16 +95,13 @@ gulp.task('minify-list', () => {
     .src([
       `${cfg.srcJs}/restaurant_list.js`,
       `${cfg.srcJs}/dbhelper.js`,
-      `${cfg.srcJs}/idb.js`
+      `${cfg.srcJs}/idb.js`,
+      `${cfg.srcJs}/lozad.js`
     ])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_list.js'))
     .pipe(
-      uglify({
-        mangle: false,
-        toplevel: true,
-        keep_classnames: true
-      })
+      uglify()
     )
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(cfg.destJs));
@@ -116,16 +113,13 @@ gulp.task('minify-details', () => {
     .src([
       `${cfg.srcJs}/restaurant_details.js`,
       `${cfg.srcJs}/dbhelper.js`,
-      `${cfg.srcJs}/idb.js`
+      `${cfg.srcJs}/idb.js`,
+      `${cfg.srcJs}/lozad.js`
     ])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_details.js'))
     .pipe(
-      uglify({
-        mangle: false,
-        toplevel: true,
-        keep_classnames: true
-      })
+      uglify()
     )
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(cfg.destJs));
@@ -137,11 +131,7 @@ gulp.task('minify-sw', () => {
     .src([`${cfg.src}/sw.js`])
     .pipe(sourcemaps.init())
     .pipe(
-      uglify({
-        mangle: false,
-        toplevel: true,
-        keep_classnames: true
-      })
+      uglify()
     )
     .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(cfg.dest));

@@ -138,12 +138,8 @@ updateRestaurants = () => {
  * Load page images after restaurant DOM has been added
  */
 lazyLoadImages = () => {
-  [].forEach.call(document.querySelectorAll('img[data-src]'), function(img) {
-    img.setAttribute('src', img.getAttribute('data-src'));
-    img.onload = function() {
-      img.removeAttribute('data-src');
-    };
-  });
+  const observer = lozad();
+  observer.observe();
 };
 
 /**
@@ -181,7 +177,7 @@ createRestaurantHTML = restaurant => {
   const li = document.createElement('li');
 
   const image = document.createElement('img');
-  image.className = 'restaurant-img';
+  image.className = 'restaurant-img lozad';
   image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
   image.alt = `Restaurant ${restaurant.name} - cuisine ${
     restaurant.cuisine_type
@@ -222,10 +218,3 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     if (self.markers) self.markers.push(marker);
   });
 };
-
-// my signature
-console.log(
-  `%c AV-RR %c Andris Vilde: Restaurant Reviews`,
-  'background: #2196F3; color: #fff; font-size: 12px; border-radius: 3px 0 0 3px; font-family: Tahoma;',
-  'background: #bee1fd; color: #000; font-size: 12px; border-radius: 0 3px 3px 0; font-family: Tahoma;'
-);

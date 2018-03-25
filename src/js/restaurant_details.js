@@ -1,4 +1,12 @@
 let restaurant, map;
+
+/**
+ * Register service worker for caching static assets
+ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js', { scope: './' });
+}
+
 /**
  * Initialize Google map, called from HTML.
  */
@@ -22,7 +30,7 @@ initMap = () => {
 /**
  * Get current restaurant from page URL.
  */
-fetchRestaurantFromURL = (callback) => {
+fetchRestaurantFromURL = callback => {
   if (self.restaurant) {
     // restaurant already fetched!
     callback(null, self.restaurant);
@@ -59,7 +67,9 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img';
-  image.alt = `Restaurant ${restaurant.name} - cuisine ${restaurant.cuisine_type}`;
+  image.alt = `Restaurant ${restaurant.name} - cuisine ${
+    restaurant.cuisine_type
+  }`;
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
 
   const cuisine = document.getElementById('restaurant-cuisine');
@@ -120,7 +130,7 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
 /**
  * Create review HTML and add it to the webpage.
  */
-createReviewHTML = (review) => {
+createReviewHTML = review => {
   const li = document.createElement('li');
   const name = document.createElement('p');
   name.classList.add('review-name');
@@ -134,7 +144,9 @@ createReviewHTML = (review) => {
 
   const rating = document.createElement('p');
   rating.classList.add('rating');
-  rating.innerHTML = `Rating: ${'<span>&#x2605;</span>'.repeat(parseInt(review.rating))}`;
+  rating.innerHTML = `Rating: ${'<span>&#x2605;</span>'.repeat(
+    parseInt(review.rating)
+  )}`;
   li.appendChild(rating);
 
   const comments = document.createElement('p');
