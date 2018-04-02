@@ -60,7 +60,7 @@ gulp.task('images', () => {
     .src(cfg.srcImg)
     .pipe(
       webp({
-        quality: 50,
+        quality: 75,
         method: 6
       })
     )

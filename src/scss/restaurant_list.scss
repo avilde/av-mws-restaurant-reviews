@@ -4,6 +4,11 @@
   height: 400px;
   width: 100%;
   background-color: #ccc;
+  overflow: hidden;
+}
+
+#map img {
+  cursor: pointer;
 }
 /* ====================== Restaurant Filtering ====================== */
 .filter-options {

@@ -17,6 +17,7 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
   fetchCuisines();
+  updateRestaurants();
   //addGoogleMap();
 });
 
@@ -102,7 +103,9 @@ window.initMap = () => {
     center: loc,
     scrollwheel: false
   });
-  updateRestaurants();
+
+  if (typeof google !== 'undefined')
+    addMarkersToMap();
 };
 
 /**
@@ -167,7 +170,6 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
     ul.append(createRestaurantHTML(restaurant));
   });
-  addMarkersToMap();
 };
 
 /**

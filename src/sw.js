@@ -20,6 +20,12 @@ const CACHE_NAME = 'av-rr-static-1',
     '/img/app-logo128.webp',
     '/img/app-logo256.webp',
     '/img/app-logo512.webp',
+    'img/google_map-w320_h400.webp',
+    'img/google_map-w412_h400.webp',
+    'img/google_map-w740_h400.webp',
+    'img/google_map-w1000_h400.webp',
+    'img/google_map-w1920_h400.webp',
+    'img/google_map-w2545_h400.webp',
     '/js/restaurant_list.js',
     '/js/restaurant_details.js',
     '/sw.js',
@@ -31,7 +37,7 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
       return cache.addAll(cachedFiles);
-    })
+    }).catch(e => console.log(`[${CACHE_NAME}] (install) caching error: ${e}`))
   );
 });
 
@@ -47,7 +53,7 @@ self.addEventListener('activate', event => {
             return caches.delete(name);
           })
       );
-    })
+    }).catch(e => console.log(`[${CACHE_NAME}] (activate) caching error: ${e}`))
   );
 });
 
@@ -60,7 +66,7 @@ self.addEventListener('fetch', event => {
           fetch(event.request).then(resp => {
             cache.put(event.request, resp.clone());
             return resp;
-          })
+          }).catch(e => console.log(`[${CACHE_NAME}] (fetch) error: ${e}`))
         );
       });
     })
