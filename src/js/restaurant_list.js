@@ -17,7 +17,7 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
   fetchCuisines();
-  addGoogleMap();
+  //addGoogleMap();
 });
 
 /**

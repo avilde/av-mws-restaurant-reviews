@@ -24,7 +24,9 @@ const webp = require('gulp-webp');
 const util = require('gulp-util');
 const sourcemaps = require('gulp-sourcemaps');
 const htmlmin = require('gulp-htmlmin');
-const serve = require('gulp-serve');
+const gzip = require('gulp-gzip');
+const browserSync = require('browser-sync').create();
+const gStatic = require('connect-gzip-static')(cfg.dest);
 
 // cleanup (remove destination folder)
 gulp.task('clean', cb => {
@@ -74,11 +76,12 @@ gulp.task('sass', () => {
         outputStyle: 'compressed'
       })
     )
+    .pipe(gzip())
     .pipe(gulp.dest(cfg.destCss));
 });
 
 // html files (minify HTML files)
-gulp.task('html', function() {
+gulp.task('html', function () {
   return gulp
     .src(`${cfg.src}*.html`)
     .pipe(
@@ -86,6 +89,7 @@ gulp.task('html', function() {
         collapseWhitespace: true
       })
     )
+    .pipe(gzip())
     .pipe(gulp.dest(cfg.dest));
 });
 
@@ -100,10 +104,9 @@ gulp.task('minify-list', () => {
     ])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_list.js'))
-    .pipe(
-      uglify()
-    )
+    .pipe(uglify())
     .pipe(sourcemaps.write('./'))
+    .pipe(gzip())
     .pipe(gulp.dest(cfg.destJs));
 });
 
@@ -118,10 +121,9 @@ gulp.task('minify-details', () => {
     ])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_details.js'))
-    .pipe(
-      uglify()
-    )
+    .pipe(uglify())
     .pipe(sourcemaps.write('./'))
+    .pipe(gzip())
     .pipe(gulp.dest(cfg.destJs));
 });
 
@@ -130,10 +132,9 @@ gulp.task('minify-sw', () => {
   return gulp
     .src([`${cfg.src}/sw.js`])
     .pipe(sourcemaps.init())
-    .pipe(
-      uglify()
-    )
+    .pipe(uglify())
     .pipe(sourcemaps.write('./'))
+    .pipe(gzip())
     .pipe(gulp.dest(cfg.dest));
 });
 
@@ -153,8 +154,7 @@ gulp.task('post-cleanup', [
   'minify-list',
   'minify-details',
   'minify-sw',
-  'root-files',
-  'serve'
+  'root-files'
 ]);
 
 /**
@@ -166,10 +166,14 @@ gulp.task('build', ['clean'], () => {
 });
 
 // run localhost server
-gulp.task(
-  'serve',
-  serve({
-    root: ['public'],
-    port: 8000
-  })
-);
+gulp.task('serve', () => {
+  browserSync.init({
+    server: cfg.dest,
+    port: 8000,
+    ui: false
+  }, function (err, bs) {
+    bs.addMiddleware('*', gStatic, {
+      override: true
+    });
+  });
+});

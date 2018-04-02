@@ -59,9 +59,9 @@ class DBHelper {
           .getAll();
       })
       .then(data => {
+        // idb restaurant data
         if (data && data.length > 0) return callback(null, data);
         else {
-          // idb restaurant data
           fetch(DBHelper.DATABASE_URL)
             .then(resp => {
               if (resp.status !== 200)
@@ -222,9 +222,9 @@ class DBHelper {
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return restaurant && restaurant.photograph
-      ? `img/${restaurant.photograph}.webp`
-      : 'img/no-image.svg';
+    return restaurant && restaurant.photograph ?
+      `img/${restaurant.photograph}.webp` :
+      'img/no-image.svg';
   }
 
   /**
