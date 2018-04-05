@@ -11,6 +11,10 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', {
     scope: './'
   });
+
+  navigator.serviceWorker.ready.then(swRegistration => {
+    return swRegistration.sync.register('syncUp');
+  });
 }
 
 /**

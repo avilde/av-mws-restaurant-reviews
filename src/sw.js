@@ -80,3 +80,15 @@ self.addEventListener('fetch', event => {
     .catch(e => console.error(`[${APP_NAME}] (fetch) exception when openning cache ${CACHE_NAME}. Error: ${e}`))
   );
 });
+
+
+// sync any data changed offline
+self.addEventListener('sync', function (event) {
+  if (event.tag == 'syncUp') {
+    event.waitUntil(syncData());
+  }
+});
+
+syncData = _ => {
+  console.log('synched');
+}
