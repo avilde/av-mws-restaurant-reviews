@@ -1,6 +1,6 @@
-let restaurants,
-  neighborhoods,
-  cuisines,
+let restaurants = [],
+  neighborhoods = [],
+  cuisines = [],
   map,
   markers = [];
 
@@ -8,7 +8,9 @@ let restaurants,
  * Register service worker for caching static assets
  */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js', { scope: './' });
+  navigator.serviceWorker.register('./sw.js', {
+    scope: './'
+  });
 }
 
 /**
@@ -18,7 +20,6 @@ document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
   fetchCuisines();
   updateRestaurants();
-  //addGoogleMap();
 });
 
 /**
@@ -177,13 +178,12 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  */
 createRestaurantHTML = restaurant => {
   const li = document.createElement('li');
+  li.setAttribute('restaurant-id', restaurant.id);
 
   const image = document.createElement('img');
   image.className = 'restaurant-img lozad';
   image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
-  image.alt = `Restaurant ${restaurant.name} - cuisine ${
-    restaurant.cuisine_type
-  }`;
+  image.alt = `Restaurant ${restaurant.name} - cuisine ${restaurant.cuisine_type}`;
   li.append(image);
 
   const name = document.createElement('h2');
@@ -204,6 +204,18 @@ createRestaurantHTML = restaurant => {
   more.href = DBHelper.urlForRestaurant(restaurant);
   li.append(more);
 
+  const favToggle = document.createElement('span');
+  favToggle.innerHTML = `&#x2605;`;
+  favToggle.title = 'Favorite restaurant';
+  favToggle.classList.add('favorite-restaurant');
+  if (stringToBoolean(restaurant.is_favorite))
+    favToggle.classList.add('is-favorite');
+  favToggle.addEventListener('click', event => {
+    favoriteRestaurant(event.target, restaurant);
+  });
+
+  li.append(favToggle);
+
   return li;
 };
 
@@ -220,3 +232,16 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     if (self.markers) self.markers.push(marker);
   });
 };
+
+/**
+ * Favorite/unfavorite restaurant
+ */
+favoriteRestaurant = (target, restaurant) => {
+  if (target.className.indexOf('is-favorite') > -1) {
+    target.classList.remove('is-favorite');
+    DBHelper.favoriteRestaurant(restaurant, false);
+  } else {
+    target.classList.add('is-favorite');
+    DBHelper.favoriteRestaurant(restaurant, true);
+  }
+}

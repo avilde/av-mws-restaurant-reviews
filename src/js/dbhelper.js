@@ -8,14 +8,14 @@ class DBHelper {
    */
   static get DATABASE_URL() {
     const port = 1337; // Change this to your server port
-    return `http://localhost:${port}/restaurants`;
+    return `http://localhost:${port}`;
   }
 
   /**
    * database name (= service worker name)
    */
   static get DB_NAME() {
-    return 'av-rr';
+    return APP_NAME;
   }
 
   /**
@@ -62,7 +62,7 @@ class DBHelper {
         // idb restaurant data
         if (data && data.length > 0) return callback(null, data);
         else {
-          fetch(DBHelper.DATABASE_URL)
+          fetch(`${DBHelper.DATABASE_URL}/restaurants`)
             .then(resp => {
               if (resp.status !== 200)
                 console.error(
@@ -84,7 +84,7 @@ class DBHelper {
               });
               return callback(null, restaurants);
             })
-            .catch(e => console.error(`Request failed. Returned error: ${e}`));
+            .catch(e => console.error(`[${APP_NAME}] request failed: ${e}`));
         }
       });
   }
@@ -93,18 +93,15 @@ class DBHelper {
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
-    // fetch all restaurants with proper error handling.
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
         const restaurant = restaurants.find(r => r.id == id);
         if (restaurant) {
-          // Got the restaurant
           callback(null, restaurant);
         } else {
-          // Restaurant does not exist in the database
-          callback('Restaurant does not exist', null);
+          callback(`[${APP_NAME}] restaurant does not exist`, null);
         }
       }
     });
@@ -178,14 +175,9 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map(
-          (v, i) => restaurants[i].neighborhood
-        );
-        // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter(
-          (v, i) => neighborhoods.indexOf(v) == i
-        );
+        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood);
+        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i);
+
         callback(null, uniqueNeighborhoods);
       }
     });
@@ -200,9 +192,7 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        // Get all cuisines from all restaurants
         const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
-        // Remove duplicates from cuisines
         const uniqueCuisines = cuisines.filter(
           (v, i) => cuisines.indexOf(v) == i
         );
@@ -240,11 +230,57 @@ class DBHelper {
     });
     return marker;
   }
+
+  /**
+   * Favorite/unfavorite a restaurant
+   * @param {String} id restaurant id
+   * @param {Boolean} state true/false - favorite/unfavorite
+   */
+  static favoriteRestaurant(restaurant, state) {
+    if (!restaurant || typeof state !== 'boolean') return;
+
+    restaurant.is_favorite = state;
+
+    fetch(`${DBHelper.DATABASE_URL}/restaurants/${restaurant.id}/?is_favorite=${state}`, {
+      method: 'PUT'
+    }).then(resp => {
+      if (resp.status != 200)
+        console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+    }).catch(e => {
+      console.error(`[${APP_NAME}] put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
+    });
+
+    // update idb record
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+      const store = db
+        .transaction(DBHelper.STORE_NAME, 'readwrite')
+        .objectStore(DBHelper.STORE_NAME);
+
+      store.put(restaurant);
+    });
+  }
 }
 
-// my signature
-console.log(
-  `%c AV-RR %c Andris Vilde: Restaurant Reviews `,
-  'background: #2196F3; color: #fff; font-size: 12px; border-radius: 3px 0 0 3px; font-family: Tahoma;',
-  'background: #bee1fd; color: #000; font-size: 12px; border-radius: 0 3px 3px 0; font-family: Tahoma;'
-);
+/**
+ * Covert string to boolean
+ * @param {any} str string variable (if other then evaluate if bool)
+ */
+stringToBoolean = str => {
+  if (typeof str === 'string') {
+    switch (str.toLowerCase().trim()) {
+      case 'true':
+      case 'yes':
+      case '1':
+        return true;
+      case 'false':
+      case 'no':
+      case '0':
+      case null:
+        return false;
+    }
+  }
+
+  return Boolean(str);
+}

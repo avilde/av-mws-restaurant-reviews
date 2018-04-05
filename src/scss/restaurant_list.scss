@@ -1,5 +1,6 @@
 @charset "utf-8";
 /* ====================== Map ====================== */
+
 #map {
   height: 400px;
   width: 100%;
@@ -10,7 +11,9 @@
 #map img {
   cursor: pointer;
 }
+
 /* ====================== Restaurant Filtering ====================== */
+
 .filter-options {
   display: flex;
   width: 100%;
@@ -26,6 +29,7 @@
   line-height: 1;
   margin: 20px;
 }
+
 .filter-options select {
   background-color: white;
   border: 1px solid #fff;
@@ -43,13 +47,13 @@
     flex-wrap: wrap;
     flex-direction: column;
   }
-
   div.filter-options h2 {
     margin: 10px 20px;
   }
 }
 
 /* ====================== Restaurant Listing ====================== */
+
 #restaurants-list {
   display: flex;
   flex-wrap: wrap;
@@ -60,6 +64,7 @@
 }
 
 #restaurants-list li {
+  position: relative;
   background-color: #fff;
   border: 2px solid #ccc;
   font-family: Arial, sans-serif;
@@ -68,6 +73,10 @@
   padding: 0 20px 25px 20px;
   text-align: left;
   width: 270px;
+}
+
+#restaurants-list li:hover {
+  border-color: #46589d;
 }
 
 #restaurants-list .restaurant-img {
@@ -121,7 +130,6 @@
     padding-top: 10px;
     padding-bottom: 20px;
   }
-
   #restaurants-list li {
     margin-left: auto;
     margin-right: auto;
@@ -129,7 +137,6 @@
     min-height: 50%;
     min-width: 74vw;
   }
-
   #restaurants-list .restaurant-img {
     min-width: 50%;
     min-height: 50%;
@@ -142,4 +149,42 @@
     min-width: 42%;
     min-height: 42%;
   }
+}
+
+#restaurants-list>li>span.favorite-restaurant {
+  display: block;
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 2px solid white;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  background: #46589d;
+  opacity: .3;
+  text-align: center;
+  line-height: 30px;
+  font-size: 20px;
+  transition: border-width 0.1s ease-in-out;
+}
+
+#restaurants-list>li>span.favorite-restaurant:hover {
+  opacity: .9;
+  color: #dcd73e;
+  cursor: pointer;
+}
+
+#restaurants-list>li>span.favorite-restaurant:active {
+  border-width: 3px;
+  color: #fffb7e;
+}
+
+#restaurants-list>li:hover span {
+  opacity: .5;
+}
+
+#restaurants-list>li>span.favorite-restaurant.is-favorite {
+  opacity: 1;
+  border-width: 1px;
+  color: #faf447;
 }
