@@ -97,6 +97,7 @@ gulp.task('html', function () {
 gulp.task('minify-list', () => {
   return gulp
     .src([
+      `${cfg.srcJs}/signature.js`,
       `${cfg.srcJs}/restaurant_list.js`,
       `${cfg.srcJs}/dbhelper.js`,
       `${cfg.srcJs}/idb.js`,
@@ -114,6 +115,7 @@ gulp.task('minify-list', () => {
 gulp.task('minify-details', () => {
   return gulp
     .src([
+      `${cfg.srcJs}/signature.js`,
       `${cfg.srcJs}/restaurant_details.js`,
       `${cfg.srcJs}/dbhelper.js`,
       `${cfg.srcJs}/idb.js`,
