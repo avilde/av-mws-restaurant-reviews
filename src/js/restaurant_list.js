@@ -30,11 +30,10 @@ document.addEventListener('DOMContentLoaded', event => {
  * Async add google map
  */
 addGoogleMap = () => {
-  const API_KEY = 'AIzaSyDRi2AMR_VvvpKmGp448AvanrS9zp_XSNc',
-    script = document.createElement('script');
+  let script = document.createElement('script');
 
   script.type = 'text/javascript';
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&callback=initMap`;
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&callback=initMap`;
   document.body.appendChild(script);
 };
 

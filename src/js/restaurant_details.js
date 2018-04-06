@@ -4,8 +4,17 @@ let restaurant, map;
  * Register service worker for caching static assets
  */
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js', { scope: './' });
+  navigator.serviceWorker.register('./sw.js', {
+    scope: './'
+  });
 }
+
+/**
+ * Load Google Map & Restaurant data
+ */
+document.addEventListener('DOMContentLoaded', event => {
+  addGoogleMap();
+});
 
 /**
  * Initialize Google map, called from HTML.
@@ -67,9 +76,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const image = document.getElementById('restaurant-img');
   image.className = 'restaurant-img';
-  image.alt = `Restaurant ${restaurant.name} - cuisine ${
-    restaurant.cuisine_type
-  }`;
+  image.alt = `Restaurant ${restaurant.name} - cuisine ${restaurant.cuisine_type}`;
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
 
   const cuisine = document.getElementById('restaurant-cuisine');
@@ -80,7 +87,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
     fillRestaurantHoursHTML();
   }
   // fill reviews
-  fillReviewsHTML();
+  if (restaurant)
+    fillReviewsHTML(restaurant);
 };
 
 /**
@@ -108,20 +116,32 @@ fillRestaurantHoursHTML = (
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (restaurant = self.restaurant) => {
+  let reviewsList;
+  
+  if (self.restaurant.reviews)
+    reviewsList = self.restaurant.reviews;
+  else
+    DBHelper.fetchReviewsByRestaurantId(restaurant.id, (error, reviews) => {
+      if (!reviews)
+        return console.error(error);
+
+      reviewsList = self.restaurant.reviews = reviews;
+    });
+
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
 
-  if (!reviews) {
+  if (!reviewsList) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
     container.appendChild(noReviews);
     return;
   }
   const ul = document.getElementById('reviews-list');
-  reviews.forEach(review => {
+  reviewsList.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
@@ -144,9 +164,7 @@ createReviewHTML = review => {
 
   const rating = document.createElement('p');
   rating.classList.add('rating');
-  rating.innerHTML = `Rating: ${'<span>&#x2605;</span>'.repeat(
-    parseInt(review.rating)
-  )}`;
+  rating.innerHTML = `Rating: ${'<span>&#x2605;</span>'.repeat(parseInt(review.rating))}`;
   li.appendChild(rating);
 
   const comments = document.createElement('p');
@@ -178,4 +196,15 @@ getParameterByName = (name, url) => {
   if (!results) return null;
   if (!results[2]) return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
+};
+
+/**
+ * Async add google map
+ */
+addGoogleMap = () => {
+  let script = document.createElement('script');
+
+  script.type = 'text/javascript';
+  script.src = `https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&callback=initMap`;
+  document.body.appendChild(script);
 };

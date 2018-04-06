@@ -1,4 +1,7 @@
 const APP_NAME = 'av-rr';
+
+const MAP_API_KEY = 'AIzaSyB1eWmbJ77N0GZFASeLjh0oMWGAi0BKnHc';
+
 // my signature
 console.log(
     `%c ${APP_NAME} %c restaurant reviews `,
