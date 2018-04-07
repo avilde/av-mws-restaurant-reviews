@@ -166,10 +166,13 @@ resetRestaurants = restaurants => {
  * @param {Array} restaurants - list of restaurants
  */
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
+  const fragment = document.createDocumentFragment();
   const ul = document.getElementById('restaurants-list');
   restaurants.forEach(restaurant => {
-    ul.append(createRestaurantHTML(restaurant));
+    fragment.append(createRestaurantHTML(restaurant));
   });
+
+  ul.appendChild(fragment);
 };
 
 /**

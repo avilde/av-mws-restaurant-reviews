@@ -36,54 +36,61 @@ const APP_NAME = 'av-rr',
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-    .then(cache => {
-      return cache.addAll(cachedFiles);
-    })
-    .catch(e => console.error(`[${APP_NAME}] (install) caching error: ${e}`))
+    caches
+      .open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(cachedFiles);
+      })
+      .catch(e => console.error(`[${APP_NAME}] (install) caching error: ${e}`))
   );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-    .then(cacheNames => {
-      return Promise.all(
-        cacheNames
-        .filter(name => {
-          return name.startsWith('av-rr-') && name !== CACHE_NAME;
-        })
-        .map(name => {
-          return caches.delete(name);
-        })
-      );
-    })
-    .catch(e => console.error(`[${APP_NAME}] (activate) caching error: ${e}`))
+    caches
+      .keys()
+      .then(cacheNames => {
+        return Promise.all(
+          cacheNames
+            .filter(name => {
+              return name.startsWith('av-rr-') && name !== CACHE_NAME;
+            })
+            .map(name => {
+              return caches.delete(name);
+            })
+        );
+      })
+      .catch(e => console.error(`[${APP_NAME}] (activate) caching error: ${e}`))
   );
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(caches.open(CACHE_NAME)
-    .then(cache => {
-      return cache.match(event.request)
-        .then(resp => {
-          return resp ||
-            fetch(event.request)
-            .then(resp => {
-              cache.put(event.request, resp.clone());
-              return resp;
-            })
-            .catch(e => console.error(`[${APP_NAME}] (fetch) error: ${e}`));
-        })
-        .catch(e => console.error(`[${APP_NAME}] (fetch) exception in cache match. Error: ${e}`))
-    })
-    .catch(e => console.error(`[${APP_NAME}] (fetch) exception when openning cache ${CACHE_NAME}. Error: ${e}`))
+  event.respondWith(
+    caches
+      .open(CACHE_NAME)
+      .then(cache => {
+        return cache
+          .match(event.request)
+          .then(resp => {
+            return (
+              resp ||
+              fetch(event.request)
+                .then(resp => {
+                  cache.put(event.request, resp.clone());
+
+                  return resp;
+                })
+                .catch(e => console.error(`[${APP_NAME}] (fetch) error: ${e}`))
+            );
+          })
+          .catch(e => console.error(`[${APP_NAME}] (fetch) exception in cache match. Error: ${e}`));
+      })
+      .catch(e => console.error(`[${APP_NAME}] (fetch) exception when openning cache ${CACHE_NAME}. Error: ${e}`))
   );
 });
 
-
 // sync any data changed offline
-self.addEventListener('sync', function (event) {
+self.addEventListener('sync', function(event) {
   if (event.tag == 'syncUp') {
     event.waitUntil(syncData());
   }
@@ -91,4 +98,4 @@ self.addEventListener('sync', function (event) {
 
 syncData = _ => {
   console.log('synched');
-}
+};
