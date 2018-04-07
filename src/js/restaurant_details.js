@@ -13,27 +13,43 @@ if ('serviceWorker' in navigator) {
  * Load Google Map & Restaurant data
  */
 document.addEventListener('DOMContentLoaded', event => {
-  addGoogleMap();
+  drawRestaurant();
+
+  // do not add google map until visible
+  const observer = new IntersectionObserver(
+    entry => {
+      entry.forEach(change => {
+        if (change.isIntersecting) {
+          addGoogleMap();
+          observer.unobserve(document.getElementById('map'));
+        }
+      });
+    },
+    {threshold: [1.0]}
+  );
+
+  observer.observe(document.getElementById('map'));
 });
+
+drawRestaurant = () => {
+  fetchRestaurantFromURL((error, restaurant) => {
+    self.restaurant = restaurant;
+    if (error) console.error(error);
+    else fillBreadcrumb();
+  });
+};
 
 /**
  * Initialize Google map & load restaurant details
  */
 initMap = () => {
-  fetchRestaurantFromURL((error, restaurant) => {
-    if (error) {
-      // Got an error!
-      console.error(error);
-    } else {
-      self.map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 16,
-        center: restaurant.latlng,
-        scrollwheel: false
-      });
-      fillBreadcrumb();
-      DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
-    }
+  self.map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 16,
+    center: self.restaurant.latlng,
+    scrollwheel: false
   });
+
+  DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
 };
 
 /**
@@ -71,9 +87,9 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   address.innerHTML = restaurant.address;
 
   const image = document.getElementById('restaurant-img');
-  image.className = 'restaurant-img';
+  image.className = 'restaurant-img lozad';
   image.alt = `Restaurant ${restaurant.name} - cuisine ${restaurant.cuisine_type}`;
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
 
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
@@ -87,6 +103,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) fillRestaurantHoursHTML();
 
   if (restaurant) fillReviewsHTML(restaurant);
+
+  lazyLoadImages();
 };
 
 /**
@@ -217,9 +235,18 @@ getParameterByName = (name, url) => {
  * Async add google map
  */
 addGoogleMap = () => {
+  console.log('map');
   let script = document.createElement('script');
 
   script.type = 'text/javascript';
   script.src = `https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&callback=initMap`;
   document.body.appendChild(script);
+};
+
+/**
+ * Load page images after restaurant DOM has been added
+ */
+lazyLoadImages = () => {
+  const observer = lozad();
+  observer.observe();
 };

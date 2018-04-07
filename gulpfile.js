@@ -3,7 +3,9 @@
 const cfg = {
   src: 'src/',
   dest: 'public/',
-  destImg: `public/img`,
+  destImg: 'public/img',
+  destCss: 'public/css',
+  destJs: 'public/js',
   srcCss: 'src/scss/**/*.scss',
   srcJs: 'src/js',
   srcImg: 'src/img/**/*.*',
@@ -66,8 +68,16 @@ gulp.task('images', () => {
     .pipe(gulp.dest(cfg.destImg));
 });
 
-// pre-processor for CSS (minify too)
-gulp.task('sass', () => {
+// pre-processor for CSS (minify too) - DEV
+gulp.task('sass-dev', () => {
+  return gulp
+    .src(cfg.srcCss)
+    .pipe(sass())
+    .pipe(gulp.dest(cfg.destCss));
+});
+
+// pre-processor for CSS (minify too) - PROD
+gulp.task('sass-prod', () => {
   return gulp
     .src(cfg.srcCss)
     .pipe(
@@ -78,30 +88,55 @@ gulp.task('sass', () => {
     .pipe(gulp.dest(cfg.tmpCss));
 });
 
-// bundle code for index.html
-gulp.task('minify-list', () => {
+// bundle code for index.html - DEV
+gulp.task('minify-list-dev', () => {
   return gulp
     .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_list.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(cfg.destJs));
+});
+
+// bundle code for index.html - PROD
+gulp.task('minify-list-prod', () => {
+  return gulp
+    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
+    .pipe(concat('restaurant_list.js'))
+    .pipe(uglify())
     .pipe(gulp.dest(cfg.tmpJs));
 });
 
-// bundle code for restaurant.html
-gulp.task('minify-details', () => {
+// bundle code for restaurant.html - DEV
+gulp.task('minify-details-dev', () => {
   return gulp
     .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_details.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
+    .pipe(gulp.dest(cfg.destJs));
+});
+
+// bundle code for restaurant.html - PROD
+gulp.task('minify-details-prod', () => {
+  return gulp
+    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
+    .pipe(concat('restaurant_details.js'))
+    .pipe(uglify())
     .pipe(gulp.dest(cfg.tmpJs));
 });
 
 // minify service worker code
-gulp.task('minify-sw', () => {
+gulp.task('minify-sw-prod', () => {
+  return gulp
+    .src([`${cfg.src}/sw.js`])
+    .pipe(uglify())
+    .pipe(gulp.dest(cfg.dest));
+});
+
+gulp.task('minify-sw-dev', () => {
   return gulp
     .src([`${cfg.src}/sw.js`])
     .pipe(sourcemaps.init())
@@ -120,6 +155,10 @@ gulp.task('tmp-html', () => {
   gulp.src([`${cfg.src}index.html`, `${cfg.src}restaurant.html`]).pipe(gulp.dest(cfg.tmp));
 });
 
+// copy root files
+gulp.task('dev-html', () => {
+  gulp.src([`${cfg.src}index.html`, `${cfg.src}restaurant.html`]).pipe(gulp.dest(cfg.dest));
+});
 
 // html files (minify HTML files & inline css/js)
 gulp.task('inline-html', function() {
@@ -152,8 +191,13 @@ gulp.task('clean-tmp', cb => {
 /**
  *  [ BUILD ]
  *  build distibrutable code
+ *  prod - production environment
+ *  dev - development environment
  */
-gulp.task('build', seq('clean', ['root-files', 'lint', 'images', 'sass', 'minify-list', 'minify-details', 'minify-sw'],'tmp-html', 'inline-html', 'clean-tmp'));
+
+gulp.task('prod', seq('clean', 'tmp-html', 'root-files', 'lint', 'images', 'sass-prod', 'minify-list-prod', 'minify-details-prod', 'minify-sw-prod', 'inline-html', 'clean-tmp'));
+
+gulp.task('dev', seq('clean', ['root-files', 'lint', 'images', 'sass-dev', 'minify-list-dev', 'minify-details-dev', 'minify-sw-dev'], 'dev-html', 'clean-tmp'));
 
 /**
  * [ SERVE ]

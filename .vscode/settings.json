@@ -1,3 +1,4 @@
 {
-    "prettier.bracketSpacing": false
+    "prettier.bracketSpacing": false,
+    "files.autoSave": "onFocusChange"
 }

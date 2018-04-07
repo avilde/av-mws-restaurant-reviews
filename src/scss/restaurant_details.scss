@@ -220,7 +220,16 @@ nav h1 img.app-logo {
   max-width: 100vw;
 }
 
+.inside .restaurant-title {
+  display: flex;
+  align-items: baseline;
+}
+
 @media screen and (max-width: 800px) {
+  .inside .restaurant-title {
+    margin-top: 125px;
+  }
+
   .inside .section-container {
     margin: 0;
     padding-top: 10px;
@@ -387,4 +396,10 @@ span#favorite:hover span {
 span#favorite.favorite-restaurant.is-favorite {
   opacity: 1;
   color: #faf447;
+}
+
+@media screen and (max-width: 740px) {
+  #favorite {
+    margin: 10px;
+  }
 }
