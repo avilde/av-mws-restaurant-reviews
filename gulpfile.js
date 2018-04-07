@@ -11,22 +11,24 @@ const cfg = {
   destImg: `public/img`
 };
 // includes
-const gulp = require('gulp');
-const eslint = require('gulp-eslint');
-const sass = require('gulp-sass');
-const concat = require('gulp-concat');
-const uglifyes = require('uglify-es');
-const composer = require('gulp-uglify/composer');
-const uglify = composer(uglifyes, console); // for ES6 code
-const clean = require('gulp-clean');
-const imagemin = require('gulp-imagemin');
-const webp = require('gulp-webp');
-const util = require('gulp-util');
-const sourcemaps = require('gulp-sourcemaps');
-const htmlmin = require('gulp-htmlmin');
-const gzip = require('gulp-gzip');
-const browserSync = require('browser-sync').create();
-const gStatic = require('connect-gzip-static')(cfg.dest);
+const gulp = require('gulp'),
+  eslint = require('gulp-eslint'),
+  sass = require('gulp-sass'),
+  concat = require('gulp-concat'),
+  uglifyes = require('uglify-es'),
+  composer = require('gulp-uglify/composer'),
+  uglify = composer(uglifyes, console),
+  clean = require('gulp-clean'),
+  imagemin = require('gulp-imagemin'),
+  webp = require('gulp-webp'),
+  util = require('gulp-util'),
+  sourcemaps = require('gulp-sourcemaps'),
+  htmlmin = require('gulp-htmlmin'),
+  gzip = require('gulp-gzip'),
+  browserSync = require('browser-sync').create(),
+  gStatic = require('connect-gzip-static')(cfg.dest),
+  inline = require('gulp-inline'),
+  seq = require('gulp-sequence');
 
 // cleanup (remove destination folder)
 gulp.task('clean', cb => {
@@ -45,11 +47,7 @@ gulp.task('lint', () => {
     .pipe(eslint.formatEach('compact', process.stderr))
     .pipe(
       eslint.results(results => {
-        console.log(
-          `[Total] files: ${results.length}, warnings: ${
-            results.warningCount
-          }, errors: ${results.errorCount}`
-        );
+        console.log(`[Total] files: ${results.length}, warnings: ${results.warningCount}, errors: ${results.errorCount}`);
       })
     );
 });
@@ -76,56 +74,28 @@ gulp.task('sass', () => {
         outputStyle: 'compressed'
       })
     )
-    .pipe(gzip())
     .pipe(gulp.dest(cfg.destCss));
-});
-
-// html files (minify HTML files)
-gulp.task('html', function () {
-  return gulp
-    .src(`${cfg.src}*.html`)
-    .pipe(
-      htmlmin({
-        collapseWhitespace: true
-      })
-    )
-    .pipe(gzip())
-    .pipe(gulp.dest(cfg.dest));
 });
 
 // bundle code for index.html
 gulp.task('minify-list', () => {
   return gulp
-    .src([
-      `${cfg.srcJs}/signature.js`,
-      `${cfg.srcJs}/restaurant_list.js`,
-      `${cfg.srcJs}/dbhelper.js`,
-      `${cfg.srcJs}/idb.js`,
-      `${cfg.srcJs}/lozad.js`
-    ])
+    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_list.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gzip())
     .pipe(gulp.dest(cfg.destJs));
 });
 
 // bundle code for restaurant.html
 gulp.task('minify-details', () => {
   return gulp
-    .src([
-      `${cfg.srcJs}/signature.js`,
-      `${cfg.srcJs}/restaurant_details.js`,
-      `${cfg.srcJs}/dbhelper.js`,
-      `${cfg.srcJs}/idb.js`,
-      `${cfg.srcJs}/lozad.js`
-    ])
+    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(sourcemaps.init())
     .pipe(concat('restaurant_details.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gzip())
     .pipe(gulp.dest(cfg.destJs));
 });
 
@@ -136,46 +106,57 @@ gulp.task('minify-sw', () => {
     .pipe(sourcemaps.init())
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gzip())
     .pipe(gulp.dest(cfg.dest));
 });
 
 // copy root files
 gulp.task('root-files', () => {
-  gulp
-    .src([`${cfg.src}manifest.json`, `${cfg.src}favicon.ico`])
-    .pipe(gulp.dest(cfg.dest));
+  gulp.src([`${cfg.src}manifest.json`, `${cfg.src}favicon.ico`, `${cfg.src}index.html`, `${cfg.src}restaurant.html`]).pipe(gulp.dest(cfg.dest));
 });
 
-// make cleanup synchronous
-gulp.task('post-cleanup', [
-  'lint',
-  'images',
-  'sass',
-  'html',
-  'minify-list',
-  'minify-details',
-  'minify-sw',
-  'root-files'
-]);
+// html files (minify HTML files & inline css/js)
+gulp.task('html', function() {
+  return (
+    gulp
+      .src(`${cfg.dest}*.html`)
+      .pipe(
+        inline({
+          base: cfg.dest,
+          disabledTypes: ['svg', 'webp', 'img']
+        })
+      )
+      .pipe(
+        htmlmin({
+          collapseWhitespace: true
+        })
+      )
+      .pipe(gzip())
+      .pipe(gulp.dest(cfg.dest))
+      .pipe(clean())
+  );
+});
 
 /**
  *  [ BUILD ]
  *  build distibrutable code
  */
-gulp.task('build', ['clean'], () => {
-  gulp.start('post-cleanup');
-});
+gulp.task('build', seq('clean', 'root-files', 'lint', 'images', 'sass', 'minify-list', 'minify-details', 'minify-sw', 'html'));
 
-// run localhost server
+/**
+ * [ SERVE ]
+ *  run localhost server
+ */
 gulp.task('serve', () => {
-  browserSync.init({
-    server: cfg.dest,
-    port: 8000,
-    ui: false
-  }, function (err, bs) {
-    bs.addMiddleware('*', gStatic, {
-      override: true
-    });
-  });
+  browserSync.init(
+    {
+      server: cfg.dest,
+      port: 8000,
+      ui: false
+    },
+    function(err, bs) {
+      bs.addMiddleware('*', gStatic, {
+        override: true
+      });
+    }
+  );
 });
