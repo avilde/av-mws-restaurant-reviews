@@ -3,12 +3,13 @@
 const cfg = {
   src: 'src/',
   dest: 'public/',
-  srcCss: `src/scss/**/*.scss`,
-  srcJs: `src/js`,
-  srcImg: `src/img/**/*.*`,
-  destCss: `public/css`,
-  destJs: `public/js`,
-  destImg: `public/img`
+  destImg: `public/img`,
+  srcCss: 'src/scss/**/*.scss',
+  srcJs: 'src/js',
+  srcImg: 'src/img/**/*.*',
+  tmp: 'tmp/',
+  tmpCss: 'tmp/css',
+  tmpJs: 'tmp/js'
 };
 // includes
 const gulp = require('gulp'),
@@ -74,7 +75,7 @@ gulp.task('sass', () => {
         outputStyle: 'compressed'
       })
     )
-    .pipe(gulp.dest(cfg.destCss));
+    .pipe(gulp.dest(cfg.tmpCss));
 });
 
 // bundle code for index.html
@@ -85,7 +86,7 @@ gulp.task('minify-list', () => {
     .pipe(concat('restaurant_list.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(cfg.destJs));
+    .pipe(gulp.dest(cfg.tmpJs));
 });
 
 // bundle code for restaurant.html
@@ -96,7 +97,7 @@ gulp.task('minify-details', () => {
     .pipe(concat('restaurant_details.js'))
     .pipe(uglify())
     .pipe(sourcemaps.write('./'))
-    .pipe(gulp.dest(cfg.destJs));
+    .pipe(gulp.dest(cfg.tmpJs));
 });
 
 // minify service worker code
@@ -111,36 +112,48 @@ gulp.task('minify-sw', () => {
 
 // copy root files
 gulp.task('root-files', () => {
-  gulp.src([`${cfg.src}manifest.json`, `${cfg.src}favicon.ico`, `${cfg.src}index.html`, `${cfg.src}restaurant.html`]).pipe(gulp.dest(cfg.dest));
+  gulp.src([`${cfg.src}manifest.json`, `${cfg.src}favicon.ico`]).pipe(gulp.dest(cfg.dest));
 });
 
+// copy root files
+gulp.task('tmp-html', () => {
+  gulp.src([`${cfg.src}index.html`, `${cfg.src}restaurant.html`]).pipe(gulp.dest(cfg.tmp));
+});
+
+
 // html files (minify HTML files & inline css/js)
-gulp.task('html', function() {
-  return (
-    gulp
-      .src(`${cfg.dest}*.html`)
-      .pipe(
-        inline({
-          base: cfg.dest,
-          disabledTypes: ['svg', 'webp', 'img']
-        })
-      )
-      .pipe(
-        htmlmin({
-          collapseWhitespace: true
-        })
-      )
-      .pipe(gzip())
-      .pipe(gulp.dest(cfg.dest))
-      .pipe(clean())
-  );
+gulp.task('inline-html', function() {
+  return gulp
+    .src(`${cfg.tmp}*.html`)
+    .pipe(
+      inline({
+        base: cfg.tmp,
+        disabledTypes: ['svg', 'webp', 'img']
+      })
+    )
+    .pipe(
+      htmlmin({
+        collapseWhitespace: true
+      })
+    )
+    .pipe(gzip())
+    .pipe(gulp.dest(cfg.dest));
+});
+
+// cleanup temp folder
+gulp.task('clean-tmp', cb => {
+  return gulp
+    .src(cfg.tmp, {
+      read: false
+    })
+    .pipe(clean());
 });
 
 /**
  *  [ BUILD ]
  *  build distibrutable code
  */
-gulp.task('build', seq('clean', 'root-files', 'lint', 'images', 'sass', 'minify-list', 'minify-details', 'minify-sw', 'html'));
+gulp.task('build', seq('clean', ['root-files', 'lint', 'images', 'sass', 'minify-list', 'minify-details', 'minify-sw'],'tmp-html', 'inline-html', 'clean-tmp'));
 
 /**
  * [ SERVE ]
