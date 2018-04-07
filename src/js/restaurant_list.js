@@ -18,7 +18,7 @@ if ('serviceWorker' in navigator) {
 }
 
 /**
- * Fetch neighborhoods and cuisines as soon as the page is loaded.
+ * Fetch neighborhoods and cuisines as soon as the page is loaded
  */
 document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
@@ -38,7 +38,7 @@ addGoogleMap = () => {
 };
 
 /**
- * Fetch all neighborhoods and set their HTML.
+ * Fetch all neighborhoods and set their HTML
  */
 fetchNeighborhoods = () => {
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
@@ -53,7 +53,8 @@ fetchNeighborhoods = () => {
 };
 
 /**
- * Set neighborhoods HTML.
+ * Set neighborhoods HTML
+ * @param {Array} neighborhoods
  */
 fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
   const select = document.getElementById('neighborhoods-select');
@@ -66,7 +67,7 @@ fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
 };
 
 /**
- * Fetch all cuisines and set their HTML.
+ * Fetch all cuisines and set their HTML
  */
 fetchCuisines = () => {
   DBHelper.fetchCuisines((error, cuisines) => {
@@ -81,7 +82,8 @@ fetchCuisines = () => {
 };
 
 /**
- * Set cuisines HTML.
+ * Set cuisines HTML
+ * @param {Array} cuisines
  */
 fillCuisinesHTML = (cuisines = self.cuisines) => {
   const select = document.getElementById('cuisines-select');
@@ -95,7 +97,7 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
 };
 
 /**
- * Initialize Google map, called from HTML.
+ * Initialize Google map
  */
 window.initMap = () => {
   let loc = {
@@ -108,12 +110,11 @@ window.initMap = () => {
     scrollwheel: false
   });
 
-  if (typeof google !== 'undefined')
-    addMarkersToMap();
+  if (typeof google !== 'undefined') addMarkersToMap();
 };
 
 /**
- * Update page and map for current restaurants.
+ * Update page and map for current restaurants
  */
 updateRestaurants = () => {
   const cSelect = document.getElementById('cuisines-select');
@@ -125,20 +126,14 @@ updateRestaurants = () => {
   const cuisine = cSelect[cIndex].value;
   const neighborhood = nSelect[nIndex].value;
 
-  DBHelper.fetchRestaurantByCuisineAndNeighborhood(
-    cuisine,
-    neighborhood,
-    (error, restaurants) => {
-      if (error) {
-        // Got an error!
-        console.error(error);
-      } else {
-        resetRestaurants(restaurants);
-        fillRestaurantsHTML();
-        lazyLoadImages();
-      }
+  DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
+    if (error) console.error(error);
+    else {
+      resetRestaurants(restaurants);
+      fillRestaurantsHTML();
+      lazyLoadImages();
     }
-  );
+  });
 };
 
 /**
@@ -150,10 +145,10 @@ lazyLoadImages = () => {
 };
 
 /**
- * Clear current restaurants, their HTML and remove their map markers.
+ * Clear current restaurants, their HTML and remove their map markers
+ * @param {Array} restaurants - list of restaurants
  */
 resetRestaurants = restaurants => {
-  // Remove all restaurants
   self.restaurants = [];
   const ul = document.getElementById('restaurants-list');
   ul.innerHTML = '';
@@ -167,7 +162,8 @@ resetRestaurants = restaurants => {
 };
 
 /**
- * Create all restaurants HTML and add them to the webpage.
+ * Create all restaurants HTML and add them to the webpage
+ * @param {Array} restaurants - list of restaurants
  */
 fillRestaurantsHTML = (restaurants = self.restaurants) => {
   const ul = document.getElementById('restaurants-list');
@@ -177,7 +173,8 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
 };
 
 /**
- * Create restaurant HTML.
+ * Create restaurant HTML
+ * @param {Object} restaurant - restaurant
  */
 createRestaurantHTML = restaurant => {
   const li = document.createElement('li');
@@ -211,8 +208,7 @@ createRestaurantHTML = restaurant => {
   favToggle.innerHTML = `&#x2605;`;
   favToggle.title = 'Favorite restaurant';
   favToggle.classList.add('favorite-restaurant');
-  if (stringToBoolean(restaurant.is_favorite))
-    favToggle.classList.add('is-favorite');
+  if (stringToBoolean(restaurant.is_favorite)) favToggle.classList.add('is-favorite');
   favToggle.addEventListener('click', event => {
     favoriteRestaurant(event.target, restaurant);
   });
@@ -223,11 +219,11 @@ createRestaurantHTML = restaurant => {
 };
 
 /**
- * Add markers for current restaurants to the map.
+ * Add markers for current restaurants to the map
+ * @param {Array} restaurants - list of restaurants
  */
 addMarkersToMap = (restaurants = self.restaurants) => {
   restaurants.forEach(restaurant => {
-    // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
     google.maps.event.addListener(marker, 'click', () => {
       window.location.href = marker.url;
@@ -238,6 +234,8 @@ addMarkersToMap = (restaurants = self.restaurants) => {
 
 /**
  * Favorite/unfavorite restaurant
+ * @param {Object} target - event target
+ * @param {Object} restaurant
  */
 favoriteRestaurant = (target, restaurant) => {
   if (target.className.indexOf('is-favorite') > -1) {
@@ -247,4 +245,4 @@ favoriteRestaurant = (target, restaurant) => {
     target.classList.add('is-favorite');
     DBHelper.favoriteRestaurant(restaurant, true);
   }
-}
+};

@@ -141,7 +141,7 @@
 }
 
 #reviews-list {
-  margin: 0;
+  margin: 0 0 30px 0;
   padding: 0;
 }
 
@@ -150,13 +150,17 @@
   border: 1px solid lightblue;
   display: block;
   list-style-type: none;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   margin-left: auto;
   margin-right: auto;
   overflow: hidden;
   position: relative;
   width: 95%;
   padding: 8px;
+}
+
+#reviews-list li:last-child {
+  margin-bottom: 0;
 }
 
 p.review-name {
@@ -185,4 +189,36 @@ p.rating span {
 
 #restaurant-hours td {
   color: #666;
+}
+
+span#favorite.favorite-restaurant {
+  display: block;
+  border: 2px solid white;
+  width: 30px;
+  height: 30px;
+  margin: 5px;
+  background: #46589d;
+  opacity: .3;
+  text-align: center;
+  line-height: 30px;
+  font-size: 20px;
+}
+
+span#favorite.favorite-restaurant:hover {
+  opacity: .9;
+  color: #dcd73e;
+  cursor: pointer;
+}
+
+span#favorite.favorite-restaurant:active {
+  color: #fffb7e;
+}
+
+span#favorite:hover span {
+  opacity: .5;
+}
+
+span#favorite.favorite-restaurant.is-favorite {
+  opacity: 1;
+  color: #faf447;
 }

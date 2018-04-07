@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', event => {
 });
 
 /**
- * Initialize Google map, called from HTML.
+ * Initialize Google map & load restaurant details
  */
 initMap = () => {
   fetchRestaurantFromURL((error, restaurant) => {
@@ -37,26 +37,21 @@ initMap = () => {
 };
 
 /**
- * Get current restaurant from page URL.
+ * Get current restaurant from page URL
+ * @param {Function} callback - calback to be executed
  */
 fetchRestaurantFromURL = callback => {
   if (self.restaurant) {
-    // restaurant already fetched!
-    callback(null, self.restaurant);
-    return;
+    return callback(null, self.restaurant);
   }
+
   const id = getParameterByName('id');
-  if (!id) {
-    // no id found in URL
-    error = 'No restaurant id in URL';
-    callback(error, null);
-  } else {
+  if (!id) callback('No restaurant id found in URL', null);
+  else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
       self.restaurant = restaurant;
-      if (!restaurant) {
-        console.error(error);
-        return;
-      }
+      if (!restaurant) return console.error(error);
+
       fillRestaurantHTML();
       callback(null, restaurant);
     });
@@ -64,7 +59,8 @@ fetchRestaurantFromURL = callback => {
 };
 
 /**
- * Create restaurant HTML and add it to the webpage
+ * Build restaurant HTML and add it to the webpage
+ * @param {Object} restaurant
  */
 fillRestaurantHTML = (restaurant = self.restaurant) => {
   const name = document.getElementById('restaurant-name');
@@ -82,21 +78,37 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   const cuisine = document.getElementById('restaurant-cuisine');
   cuisine.innerHTML = restaurant.cuisine_type;
 
-  // fill operating hours
-  if (restaurant.operating_hours) {
-    fillRestaurantHoursHTML();
-  }
-  // fill reviews
-  if (restaurant)
-    fillReviewsHTML(restaurant);
+  const favToggle = document.getElementById('favorite');
+  if (stringToBoolean(restaurant.is_favorite)) favToggle.classList.add('is-favorite');
+  favToggle.addEventListener('click', event => {
+    favoriteRestaurant(event.target, restaurant);
+  });
+
+  if (restaurant.operating_hours) fillRestaurantHoursHTML();
+
+  if (restaurant) fillReviewsHTML(restaurant);
 };
 
 /**
- * Create restaurant operating hours HTML table and add it to the webpage.
+ * Favorite/unfavorite restaurant
+ * @param {Object} target - event target
+ * @param {Object} restaurant
  */
-fillRestaurantHoursHTML = (
-  operatingHours = self.restaurant.operating_hours
-) => {
+favoriteRestaurant = (target, restaurant) => {
+  if (target.className.indexOf('is-favorite') > -1) {
+    target.classList.remove('is-favorite');
+    DBHelper.favoriteRestaurant(restaurant, false);
+  } else {
+    target.classList.add('is-favorite');
+    DBHelper.favoriteRestaurant(restaurant, true);
+  }
+};
+
+/**
+ * Setup restaurant operating hours HTML table and add it to the webpage
+ * @param {Object} operatingHours
+ */
+fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => {
   const hours = document.getElementById('restaurant-hours');
   for (let key in operatingHours) {
     const row = document.createElement('tr');
@@ -114,41 +126,41 @@ fillRestaurantHoursHTML = (
 };
 
 /**
- * Create all reviews HTML and add them to the webpage.
+ * Get restaurant reviews and build HTML for them
+ * @param {Object} restaurant
  */
 fillReviewsHTML = (restaurant = self.restaurant) => {
   let reviewsList;
-  
-  if (self.restaurant.reviews)
-    reviewsList = self.restaurant.reviews;
+
+  if (self.restaurant.reviews) reviewsList = self.restaurant.reviews;
   else
     DBHelper.fetchReviewsByRestaurantId(restaurant.id, (error, reviews) => {
-      if (!reviews)
-        return console.error(error);
+      if (!reviews) return console.error(error);
 
       reviewsList = self.restaurant.reviews = reviews;
+
+      const container = document.getElementById('reviews-container');
+      const title = document.createElement('h2');
+      title.innerHTML = 'Reviews';
+      container.appendChild(title);
+
+      if (!reviewsList) {
+        const noReviews = document.createElement('p');
+        noReviews.innerHTML = 'No reviews yet!';
+        container.appendChild(noReviews);
+        return;
+      }
+      const ul = document.getElementById('reviews-list');
+      reviewsList.forEach(review => {
+        ul.appendChild(createReviewHTML(review));
+      });
+      container.appendChild(ul);
     });
-
-  const container = document.getElementById('reviews-container');
-  const title = document.createElement('h2');
-  title.innerHTML = 'Reviews';
-  container.appendChild(title);
-
-  if (!reviewsList) {
-    const noReviews = document.createElement('p');
-    noReviews.innerHTML = 'No reviews yet!';
-    container.appendChild(noReviews);
-    return;
-  }
-  const ul = document.getElementById('reviews-list');
-  reviewsList.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
-  });
-  container.appendChild(ul);
 };
 
 /**
- * Create review HTML and add it to the webpage.
+ * Create review HTML and add it to the webpage
+ * @param {Object} review - individual review for restaurant
  */
 createReviewHTML = review => {
   const li = document.createElement('li');
@@ -159,7 +171,7 @@ createReviewHTML = review => {
 
   const date = document.createElement('span');
   date.classList.add('review-date');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.createdAt).toDateString();
   name.appendChild(date);
 
   const rating = document.createElement('p');
@@ -176,6 +188,7 @@ createReviewHTML = review => {
 
 /**
  * Add restaurant name to the breadcrumb navigation menu
+ * @param {Object} restaurant
  */
 fillBreadcrumb = (restaurant = self.restaurant) => {
   const breadcrumb = document.getElementById('breadcrumb');
@@ -186,7 +199,9 @@ fillBreadcrumb = (restaurant = self.restaurant) => {
 };
 
 /**
- * Get a parameter by name from page URL.
+ * Get a parameter by name from page URL
+ * @param {String} name - name of param
+ * @param {String} url - URL
  */
 getParameterByName = (name, url) => {
   if (!url) url = window.location.href;

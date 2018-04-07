@@ -47,13 +47,13 @@ class DBHelper {
         keyPath: 'id'
       });
 
-      storeRestaurants.createIndex('by-id', 'id');
+      //storeRestaurants.createIndex('by-id', 'id');
 
       const storeReviews = upgrade.createObjectStore(DBHelper.STORE_REVIEWS, {
         keyPath: 'id'
       });
 
-      storeReviews.createIndex('by-restaurant-id', 'restaurant_id');
+      //storeReviews.createIndex('by-restaurant-id', 'restaurant_id');
     });
   }
 
@@ -160,9 +160,10 @@ class DBHelper {
       if (error)
         callback(error, null);
       else {
-        const reviews = reviews.find(review => review.restaurant_id == id);
-        if (reviews)
-          callback(null, reviews);
+        const reviewsList = reviews.filter(review => review.restaurant_id == id);
+
+        if (reviewsList)
+          callback(null, reviewsList);
         else
           callback(`[${APP_NAME}] reviews for restaurant id '${id}' do not exist`, null);
       }
