@@ -4,7 +4,9 @@
   "description": "AV - Restaurant Reviews",
   "main": "gulpfile.js",
   "scripts": {
-    "build": "build"
+    "clean": "rm -rf node_modules",
+    "reinstall": "npm run clean && npm install",
+    "rebuild": "npm run clean && npm install && npm run build"
   },
   "repository": {
     "type": "git",
@@ -33,6 +35,7 @@
     "gulp-sequence": "^1.0.0",
     "gulp-uglify": "^3.0.0",
     "gulp-util": "^3.0.8",
+    "gulp-watch": "^5.0.0",
     "gulp-webp": "^3.0.0",
     "serve": "^6.5.3",
     "uglify-es": "^3.3.9"

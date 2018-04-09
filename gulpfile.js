@@ -31,7 +31,8 @@ const gulp = require('gulp'),
   browserSync = require('browser-sync').create(),
   gStatic = require('connect-gzip-static')(cfg.dest),
   inline = require('gulp-inline'),
-  seq = require('gulp-sequence');
+  seq = require('gulp-sequence'),
+  watch = require('gulp-watch');
 
 // cleanup (remove destination folder)
 gulp.task('clean', cb => {
@@ -188,6 +189,19 @@ gulp.task('clean-tmp', cb => {
     .pipe(clean());
 });
 
+// watch src files for changes
+gulp.task('watch', () => {
+  util.log(util.colors.bold(util.colors.cyan('[gulp-watch]'), util.colors.white('starting watch...')));
+  // js 
+  gulp.watch(`${cfg.srcJs}/*`, ['minify-list-dev', 'minify-details-dev']);
+   // css
+   gulp.watch(cfg.srcCss, ['sass-dev']);
+   // img
+   gulp.watch(cfg.srcImg, ['images']);
+   // html
+   gulp.watch(`${cfg.src}*.html`, ['dev-html']);
+})
+
 /**
  *  [ BUILD ]
  *  build distibrutable code
@@ -195,15 +209,15 @@ gulp.task('clean-tmp', cb => {
  *  dev - development environment
  */
 
-gulp.task('prod', seq('clean', 'tmp-html', 'root-files', 'lint', 'images', 'sass-prod', 'minify-list-prod', 'minify-details-prod', 'minify-sw-prod', 'inline-html', 'clean-tmp'));
+gulp.task('build-prod', seq('clean', 'tmp-html', 'root-files', 'lint', 'images', 'sass-prod', 'minify-list-prod', 'minify-details-prod', 'minify-sw-prod', 'inline-html', 'clean-tmp'));
 
-gulp.task('dev', seq('clean', ['root-files', 'lint', 'images', 'sass-dev', 'minify-list-dev', 'minify-details-dev', 'minify-sw-dev'], 'dev-html', 'clean-tmp'));
+gulp.task('build-dev', seq('clean', ['root-files', 'lint', 'images', 'sass-dev', 'minify-list-dev', 'minify-details-dev', 'minify-sw-dev'], 'dev-html','watch'));
 
 /**
- * [ SERVE ]
+ * [ SERVER ]
  *  run localhost server
  */
-gulp.task('serve', () => {
+gulp.task('server', () => {
   browserSync.init(
     {
       server: cfg.dest,

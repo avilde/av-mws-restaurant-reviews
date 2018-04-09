@@ -24,8 +24,9 @@ document.addEventListener('DOMContentLoaded', event => {
           observer.unobserve(document.getElementById('map'));
         }
       });
-    },
-    {threshold: [1.0]}
+    }, {
+      threshold: [1.0]
+    }
   );
 
   observer.observe(document.getElementById('map'));
@@ -158,9 +159,6 @@ fillReviewsHTML = (restaurant = self.restaurant) => {
       reviewsList = self.restaurant.reviews = reviews;
 
       const container = document.getElementById('reviews-container');
-      const title = document.createElement('h2');
-      title.innerHTML = 'Reviews';
-      container.appendChild(title);
 
       if (!reviewsList) {
         const noReviews = document.createElement('p');
@@ -193,11 +191,12 @@ createReviewHTML = review => {
   name.appendChild(date);
 
   const rating = document.createElement('p');
-  rating.classList.add('rating');
+  rating.classList.add('review-rating');
   rating.innerHTML = `Rating: ${'<span>&#x2605;</span>'.repeat(parseInt(review.rating))}`;
   li.appendChild(rating);
 
   const comments = document.createElement('p');
+  comments.classList.add('review-comment'); 
   comments.innerHTML = review.comments;
   li.appendChild(comments);
 
@@ -235,7 +234,6 @@ getParameterByName = (name, url) => {
  * Async add google map
  */
 addGoogleMap = () => {
-  console.log('map');
   let script = document.createElement('script');
 
   script.type = 'text/javascript';
