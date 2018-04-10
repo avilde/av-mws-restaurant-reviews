@@ -1,12 +1,5 @@
-@charset "utf-8";
 /* Theme colors */
-
-$base-color: #46589d;
-$base-light: #6880e2;
-$base-blue: #3397db;
-$base-lightblue: #6ac2ff;
 /* */
-
 body,
 h1,
 h2,
@@ -19,17 +12,14 @@ p,
 td,
 th,
 ul {
-  font-family: Arial, Helvetica, sans-serif;
-}
+  font-family: Arial, Helvetica, sans-serif; }
 
 body {
-  width: 100%;
-}
+  width: 100%; }
 
 #footer,
 nav {
-  text-align: center;
-}
+  text-align: center; }
 
 body,
 li,
@@ -38,41 +28,34 @@ td,
 th,
 ul {
   font-size: 10pt;
-  color: #333;
-}
+  color: #333; }
 
 a,
 a:focus,
 a:hover {
-  text-decoration: none;
-}
+  text-decoration: none; }
 
 body,
 p,
 td,
 th {
-  line-height: 1.5;
-}
+  line-height: 1.5; }
 
 body {
   background-color: #fdfdfd;
   margin: 0;
   position: relative;
-  height: 100%;
-}
+  height: 100%; }
 
 a {
-  color: $base-lightblue;
-}
+  color: #6ac2ff; }
 
 a:focus,
 a:hover {
-  color: $base-blue;
-}
+  color: #3397db; }
 
 a img {
-  border: 0 #fff;
-}
+  border: 0 #fff; }
 
 h1,
 h2,
@@ -80,8 +63,7 @@ h3,
 h4,
 h5,
 h6 {
-  margin: 0 0 20px;
-}
+  margin: 0 0 20px; }
 
 article,
 aside,
@@ -95,13 +77,11 @@ hgroup,
 menu,
 nav,
 section {
-  display: block;
-}
+  display: block; }
 
 #maincontent {
   background-color: #f3f3f3;
-  min-height: 100%;
-}
+  min-height: 100%; }
 
 #footer {
   background-color: #444;
@@ -109,84 +89,69 @@ section {
   font-size: 8pt;
   letter-spacing: 1px;
   padding: 10px;
-  text-transform: uppercase;
-}
+  text-transform: uppercase; }
 
 nav {
   height: 80px;
   line-height: 80px;
-  background-color: #252831;
-}
+  background-color: #252831; }
 
 nav h1 {
-  margin: auto;
-}
+  margin: auto; }
 
 nav h1 a {
   color: #fff;
   font-size: 20pt;
   font-weight: 200;
   letter-spacing: 10px;
-  text-transform: uppercase;
-}
+  text-transform: uppercase; }
 
 nav h1 img.app-logo {
   height: 64px;
   margin: 6px;
   position: absolute;
   top: 0;
-  left: 0;
-}
+  left: 0; }
 
 @media screen and (max-width: 740px) {
   nav,
   nav h1 img.app-logo {
-    height: 48px;
-  }
+    height: 48px; }
   nav {
     line-height: initial;
-    padding: 10px;
-  }
+    padding: 10px; }
   nav h1 a {
     color: #fff;
     font-size: 14pt;
     font-weight: 200;
     letter-spacing: 10px;
     text-transform: uppercase;
-    margin-left: 64px;
-  }
-}
+    margin-left: 64px; } }
 
 /* ====================== Map ====================== */
-
 #map {
   height: 400px;
   width: 100%;
   background-color: #ccc;
-  overflow: hidden;
-}
+  overflow: hidden; }
 
 #map img {
-  cursor: pointer;
-}
+  cursor: pointer; }
 
 /* ====================== Restaurant Filtering ====================== */
-
 .filter-options {
   display: flex;
   width: 100%;
   height: 100%;
-  background-color: $base-color;
-  align-items: center;
-}
+  background-color: #46589d;
+  align-items: center; }
 
 .filter-options h2 {
   color: white;
   font-size: 1rem;
   font-weight: normal;
   line-height: 1;
-  margin: 20px;
-}
+  margin: 20px; }
 
 .filter-options select {
   background-color: white;
@@ -197,21 +162,16 @@ nav h1 img.app-logo {
   letter-spacing: 0;
   margin: 10px;
   padding: 0 10px;
-  width: 200px;
-}
+  width: 200px; }
 
 @media screen and (max-width: 740px) {
   div.filter-options {
     flex-wrap: wrap;
-    flex-direction: column;
-  }
+    flex-direction: column; }
   div.filter-options h2 {
-    margin: 10px 20px;
-  }
-}
+    margin: 10px 20px; } }
 
 /* ====================== Restaurant Listing ====================== */
-
 #restaurants-list {
   display: flex;
   flex-wrap: wrap;
@@ -219,8 +179,7 @@ nav h1 img.app-logo {
   list-style: outside none none;
   padding: 30px 15px 60px;
   text-align: center;
-  will-change: transform;
-}
+  will-change: transform; }
 
 #restaurants-list li {
   position: relative;
@@ -231,12 +190,10 @@ nav h1 img.app-logo {
   min-height: 380px;
   padding: 0 20px 25px 20px;
   text-align: left;
-  width: 270px;
-}
+  width: 270px; }
 
 #restaurants-list li:hover {
-  border-color: $base-color;
-}
+  border-color: #46589d; }
 
 #restaurants-list .restaurant-img {
   background-color: #ccc;
@@ -244,24 +201,21 @@ nav h1 img.app-logo {
   margin: 0;
   max-width: 100%;
   max-height: 202.5px;
-  min-width: 100%;
-}
+  min-width: 100%; }
 
 #restaurants-list li .restaurant-name {
-  color: $base-color;
+  color: #46589d;
   font-family: Arial, sans-serif;
   font-size: 14pt;
   font-weight: 200;
   letter-spacing: 0;
   line-height: 1.3;
   margin: 20px 0 10px;
-  text-transform: uppercase;
-}
+  text-transform: uppercase; }
 
 #restaurants-list p {
   margin: 0;
-  font-size: 11pt;
-}
+  font-size: 11pt; }
 
 #restaurants-list li a {
   width: -webkit-fill-available;
@@ -275,42 +229,34 @@ nav h1 img.app-logo {
   padding: 8px 30px 10px;
   text-align: center;
   text-decoration: none;
-  text-transform: uppercase;
-}
+  text-transform: uppercase; }
 
 #restaurants-list li a:hover {
   background-color: lightgray;
-  color: $base-color;
-}
+  color: #46589d; }
 
 @media screen and (max-width: 740px) {
   #restaurants-list {
     margin: 0;
     padding-top: 10px;
-    padding-bottom: 20px;
-  }
+    padding-bottom: 20px; }
   #restaurants-list li {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 10px;
     min-height: 50%;
-    min-width: 74vw;
-  }
+    min-width: 74vw; }
   #restaurants-list .restaurant-img {
     min-width: 50%;
-    min-height: 50%;
-  }
-}
+    min-height: 50%; } }
 
 @media screen and (min-width: 741px) and (max-width: 1140px) {
   #restaurants-list li {
     padding: 10px;
     min-width: 42%;
-    min-height: 42%;
-  }
-}
+    min-height: 42%; } }
 
-#restaurants-list>li>span.favorite-restaurant {
+#restaurants-list > li > span.favorite-restaurant {
   display: block;
   position: absolute;
   top: 0;
@@ -320,31 +266,26 @@ nav h1 img.app-logo {
   width: 30px;
   height: 30px;
   margin: 5px;
-  background: $base-color;
+  background: #46589d;
   opacity: 0.3;
   text-align: center;
   line-height: 30px;
   font-size: 20px;
-  transition: border-width 0.1s ease-in-out;
-}
+  transition: border-width 0.1s ease-in-out; }
 
-#restaurants-list>li>span.favorite-restaurant:hover {
+#restaurants-list > li > span.favorite-restaurant:hover {
   opacity: 0.9;
   color: #dcd73e;
-  cursor: pointer;
-}
+  cursor: pointer; }
 
-#restaurants-list>li>span.favorite-restaurant:active {
+#restaurants-list > li > span.favorite-restaurant:active {
   border-width: 3px;
-  color: #fffb7e;
-}
+  color: #fffb7e; }
 
-#restaurants-list>li:hover span {
-  opacity: 0.5;
-}
+#restaurants-list > li:hover span {
+  opacity: 0.5; }
 
-#restaurants-list>li>span.favorite-restaurant.is-favorite {
+#restaurants-list > li > span.favorite-restaurant.is-favorite {
   opacity: 1;
   border-width: 1px;
-  color: #faf447;
-}
+  color: #faf447; }

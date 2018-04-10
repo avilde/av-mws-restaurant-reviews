@@ -14,8 +14,12 @@ if ('serviceWorker' in navigator) {
  */
 document.addEventListener('DOMContentLoaded', event => {
   drawRestaurant();
+  addRatingHandler();
 });
 
+/**
+ * Draw restaurant DOM
+ */
 drawRestaurant = () => {
   fetchRestaurantFromURL((error, restaurant) => {
     self.restaurant = restaurant;
@@ -289,3 +293,108 @@ lazyLoadImages = () => {
   const observer = lozad();
   observer.observe();
 };
+
+/**
+ * Validate if review is correct before posting
+ */
+validateReview = () => {
+  const NAME_EMPTY = '- your name is not provided',
+    NAME_TOO_SHORT = '- your name should be more than 3 symbols',
+    COMMENT_EMPTY = '- your review is empty',
+    COMMENT_TOO_SHORT = '- your review is too short (100 minimum characters)',
+    RATING_EMPTY = '- rating is not set',
+    SUCCESS = 'Review succesfully posted.',
+    NL = '\r\n',
+    EMPTY = '';
+
+  let btn = document.getElementById('my-review-btn'),
+    name = document.getElementById('my-review-name'),
+    comment = document.getElementById('my-review-comment'),
+    rating = document.getElementById('my-review-rating'),
+    msg = document.getElementById('my-review-msg'),
+    ratingmsg = document.getElementById('rating-msg'),
+    errMsg = '';
+
+
+  if (!name.value)
+    errMsg += (errMsg ? NL : EMPTY) + NAME_EMPTY;
+
+  if (name.value.length < 4)
+    errMsg += (errMsg ? NL : EMPTY) + NAME_TOO_SHORT;
+
+  if (!comment.value)
+    errMsg += (errMsg ? NL : EMPTY) + COMMENT_EMPTY;
+
+  if (comment.value.length < 100)
+    errMsg += (errMsg ? NL : EMPTY) + COMMENT_TOO_SHORT;
+
+  if (!rating.getAttribute('rating'))
+    errMsg += (errMsg ? NL : EMPTY) + RATING_EMPTY;
+
+  if (errMsg) {
+    msg.innerHTML = errMsg;
+    msg.classList.add('error');
+    msg.classList.remove('success');
+    msg.style.display = 'block';
+  } else {
+    msg.style.display = 'none';
+    msg.innerHTML = SUCCESS;
+    msg.classList.add('success');
+    msg.classList.remove('error');
+
+    postReview(name, rating, comment);
+    // cleanup
+    name.value = '';
+    comment.value = '';
+    rating.removeAttribute('rating');
+    ratingmsg.innerHTML = '';
+    // clear radio group
+    document.querySelectorAll('input[name="rating"]').forEach((rating, idx) => {
+      rating.checked = false;
+    });
+    // success message
+    setTimeout(_ => {
+      msg.style.display = 'block';
+    }, 300);
+
+    setTimeout(_ => {
+      msg.style.display = 'none';
+    }, 4000);
+  }
+}
+
+/**
+ * Add rating handlers 
+ */
+addRatingHandler = () => {
+  let labels = document.querySelectorAll('label.rating-label'),
+    rating = document.getElementById('my-review-rating'),
+    ratingMsg = document.getElementById('rating-msg');
+
+  labels.forEach((label, idx) => {
+    label.addEventListener('mouseover', () => {
+      ratingMsg.innerHTML = label.getAttribute('title');
+    });
+
+    label.addEventListener('mouseout', () => {
+      if (!rating.getAttribute('rating'))
+        ratingMsg.innerHTML = '';
+    });
+
+    label.addEventListener('click', () => {
+      ratingMsg.innerHTML = label.getAttribute('title');
+      rating.setAttribute('rating', label.getAttribute('value'));
+      console.log(label.getAttribute('value'));
+    });
+  });
+}
+
+/**
+ * Post review to server
+ * @param {String} name - poster's name (> 3 chars)
+ * @param {String} rating - {1-5}
+ * @param {String} comment - review comment (> 100 chars)
+ */
+postReview = (name, rating, comment) => {
+  console.log('review posted');
+}
