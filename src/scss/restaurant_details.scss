@@ -302,6 +302,11 @@ nav h1 img.app-logo {
   padding: 8px;
 }
 
+#reviews-list li.temp {
+  border-color: lightgray;
+  background: #eeeeee;
+}
+
 #reviews-list li:last-child {
   margin-bottom: 0;
 }
@@ -317,6 +322,10 @@ p.review-name {
   background-color: $base-color;
   font-weight: bold;
   color: white;
+}
+
+#reviews-list > li.temp > p.review-name {
+  background-color: gray;
 }
 
 p.review-comments {

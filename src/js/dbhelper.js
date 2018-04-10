@@ -44,16 +44,15 @@ class DBHelper {
   static getDb() {
     return idb.open(DBHelper.DB_NAME, DBHelper.DB_VER, upgrade => {
       const storeRestaurants = upgrade.createObjectStore(DBHelper.STORE_RESTAURANTS, {
-        keyPath: 'id'
+        keyPath: 'id',
+        autoIncrement:true
       });
-
-      //storeRestaurants.createIndex('by-id', 'id');
 
       const storeReviews = upgrade.createObjectStore(DBHelper.STORE_REVIEWS, {
-        keyPath: 'id'
+        keyPath: 'id',
+        autoIncrement: true
       });
 
-      //storeReviews.createIndex('by-restaurant-id', 'restaurant_id');
     });
   }
 
@@ -102,10 +101,11 @@ class DBHelper {
   }
 
   /**
-   * Fetch all restaurant reviews
+   * Fetch restaurant reviews by id
+   * @param {String} restaurantId
    * @param {Function} callback function to be triggered after reviews are returned
    */
-  static fetchReviews(callback) {
+  static fetchReviews(restaurantId, callback) {
     DBHelper.getDb()
       .then(db => {
         if (!db) return;
@@ -119,13 +119,22 @@ class DBHelper {
         // return idb restaurant data if found (up-to-date data)
         if (data && data.length > 0) return callback(null, data);
         else {
-          fetch(`${DBHelper.REST_URL}/${DBHelper.STORE_REVIEWS}`)
+          fetch(`${DBHelper.REST_URL}/${DBHelper.STORE_REVIEWS}/?restaurant_id=${restaurantId}`)
             .then(resp => {
               if (resp.status !== 200)
                 console.error(`Could not retrieve reviews data. Status: ${response.status}`);
               else return resp.json();
             })
             .then(reviews => {
+              // tranform reviews
+              if (reviews && reviews.length > 0) {
+                reviews.map(review => {
+                  review.pendingUpdate = false;
+                  review.createdAt = new Date(review.createdAt).valueOf();
+                  review.updatedAt = new Date(review.updatedAt).valueOf();
+                });
+              }
+
               // save reviews to idb
               DBHelper.getDb()
                 .then(db => {
@@ -137,7 +146,6 @@ class DBHelper {
 
                   if (reviews && reviews.length > 0) {
                     reviews.map(review => {
-                      review.pendingUpdate = false;
                       store.put(review);
                     });
                   }
@@ -156,11 +164,11 @@ class DBHelper {
    * @param {Function} callback - callback function
    */
   static fetchReviewsByRestaurantId(id, callback) {
-    DBHelper.fetchReviews((error, reviews) => {
+    DBHelper.fetchReviews(id, (error, reviews) => {
       if (error)
         callback(error, null);
       else {
-        const reviewsList = reviews.filter(review => review.restaurant_id == id);
+        const reviewsList = reviews; //.filter(review => review.restaurant_id == id);
 
         if (reviewsList)
           callback(null, reviewsList);
@@ -323,13 +331,15 @@ class DBHelper {
     restaurant.is_favorite = state;
 
     fetch(`${DBHelper.REST_URL}/restaurants/${restaurant.id}/?is_favorite=${state}`, {
-      method: 'PUT'
-    }).then(resp => {
-      if (resp.status != 200)
-        console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
-    }).catch(e => {
-      console.error(`[${APP_NAME}] put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
-    });
+        method: 'PUT'
+      })
+      .then(resp => {
+        if (resp.status != 200)
+          console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+      })
+      .catch(e => {
+        console.error(`[${APP_NAME}] put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
+      });
 
     // update idb record
     DBHelper.getDb().then(db => {
@@ -342,7 +352,54 @@ class DBHelper {
       store.put(restaurant);
     });
   }
+
+  /**
+   * Insert user review
+
+   */
+  static insertReview(review) {
+    if (!review) return;
+
+
+    fetch(`${DBHelper.REST_URL}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify(review)
+      })
+      .then(resp => {
+        if (resp.status != 201)
+          console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+
+        return resp.json();
+      })
+      .then(data => {
+        // update idb record
+        DBHelper.getDb().then(db => {
+          if (!db) return;
+
+          const store = db
+            .transaction(DBHelper.STORE_RESTAURANTS, 'readwrite')
+            .objectStore(DBHelper.STORE_RESTAURANTS);
+
+          store.put(data);
+        });
+      })
+      .catch(e => {
+        console.error(`[${APP_NAME}] post review request failed. Error: ${e}`);
+      });
+
+    // add idb record
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+      const store = db
+        .transaction(DBHelper.STORE_REVIEWS, 'readwrite')
+        .objectStore(DBHelper.STORE_REVIEWS);
+
+      store.put(review);
+    });
+  }
 }
+
 
 /**
  * Covert string to boolean

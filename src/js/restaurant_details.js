@@ -136,7 +136,7 @@ fillReviewsHTML = (restaurant = self.restaurant) => {
 
       self.restaurant.reviews = reviews;
 
-      drawReviews(reviews);
+      drawReviews(self.restaurant.reviews);
     });
   }
 };
@@ -146,19 +146,24 @@ fillReviewsHTML = (restaurant = self.restaurant) => {
  * @param {Array} reviewsList - array of restaurant reviews
  */
 drawReviews = (reviewsList) => {
-  const container = document.getElementById('reviews-container');
+  // sort reviews by latest
+  reviewsList = reviewsList.sort((r1, r2) => r2.createdAt - r1.createdAt);
+
+  const ul = document.getElementById('reviews-list'),
+    fragment = document.createDocumentFragment();
 
   if (!reviewsList || reviewsList && reviewsList.length === 0) {
     const noReviews = document.createElement('p');
     noReviews.innerHTML = 'No reviews yet!';
-    container.appendChild(noReviews);
+    ul.appendChild(noReviews);
     return;
   }
-  const ul = document.getElementById('reviews-list');
+
   reviewsList.forEach(review => {
-    ul.appendChild(createReviewHTML(review));
+    fragment.append(createReviewHTML(review));
   });
-  container.appendChild(ul);
+
+  ul.appendChild(fragment);
 }
 
 /**
@@ -167,6 +172,7 @@ drawReviews = (reviewsList) => {
  */
 createReviewHTML = review => {
   const li = document.createElement('li');
+
   const name = document.createElement('p');
   name.classList.add('review-name');
   name.innerHTML = review.name;
@@ -312,8 +318,11 @@ validateReview = () => {
     comment = document.getElementById('my-review-comment'),
     rating = document.getElementById('my-review-rating'),
     msg = document.getElementById('my-review-msg'),
-    ratingmsg = document.getElementById('rating-msg'),
-    errMsg = '';
+    ratingMsg = document.getElementById('rating-msg'),
+    ul = document.getElementById('reviews-list'),
+    errMsg = '',
+    review,
+    el;
 
 
   if (!name.value)
@@ -342,24 +351,42 @@ validateReview = () => {
     msg.classList.add('success');
     msg.classList.remove('error');
 
-    postReview(name, rating, comment);
+    // create new review obj
+    review = {
+      restaurant_id: self.restaurant.id,
+      name: name.value,
+      rating: parseInt(rating.getAttribute('rating')),
+      comments: comment.value,
+      createdAt: new Date()
+    };
+
+    // insert review in db
+    DBHelper.insertReview(review);
+
     // cleanup
     name.value = '';
     comment.value = '';
     rating.removeAttribute('rating');
-    ratingmsg.innerHTML = '';
+    ratingMsg.innerHTML = '';
     // clear radio group
     document.querySelectorAll('input[name="rating"]').forEach((rating, idx) => {
       rating.checked = false;
     });
+
+    // create new review node
+    el = createReviewHTML(review);
+
     // success message
     setTimeout(_ => {
       msg.style.display = 'block';
+      el.classList.add('temp');
+      ul.insertBefore(el, ul.firstChild);
     }, 300);
 
     setTimeout(_ => {
       msg.style.display = 'none';
-    }, 4000);
+      el.classList.remove('temp');
+    }, 1500);
   }
 }
 
@@ -384,17 +411,6 @@ addRatingHandler = () => {
     label.addEventListener('click', () => {
       ratingMsg.innerHTML = label.getAttribute('title');
       rating.setAttribute('rating', label.getAttribute('value'));
-      console.log(label.getAttribute('value'));
     });
   });
-}
-
-/**
- * Post review to server
- * @param {String} name - poster's name (> 3 chars)
- * @param {String} rating - {1-5}
- * @param {String} comment - review comment (> 100 chars)
- */
-postReview = (name, rating, comment) => {
-  console.log('review posted');
 }
