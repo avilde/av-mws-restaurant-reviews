@@ -106,23 +106,6 @@ section {
   text-transform: uppercase;
 }
 
-div.author {
-  font-size: 10px;
-  border-top: 1px solid #696868;
-  padding-top: 10px;
-  margin: 5px 50px 0;
-}
-
-div.author > span.made-by {
-  text-transform: initial;
-  padding-right: 5px;
-}
-
-div.author > span.author-name {
-  color: #6ac2ff;
-  font-weight: 700;
-}
-
 nav {
   height: 80px;
   line-height: 80px;
@@ -253,7 +236,7 @@ nav h1 img.app-logo {
   display: block;
   margin: 0;
   max-width: 100%;
-  min-height: 248px;
+  max-height: 202.5px;
   min-width: 100%;
 }
 

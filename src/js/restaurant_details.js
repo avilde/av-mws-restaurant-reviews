@@ -14,43 +14,18 @@ if ('serviceWorker' in navigator) {
  */
 document.addEventListener('DOMContentLoaded', event => {
   drawRestaurant();
-
-  // do not add google map until visible
-  const observer = new IntersectionObserver(
-    entry => {
-      entry.forEach(change => {
-        if (change.isIntersecting) {
-          addGoogleMap();
-          observer.unobserve(document.getElementById('map'));
-        }
-      });
-    }, {
-      threshold: [1.0]
-    }
-  );
-
-  observer.observe(document.getElementById('map'));
 });
 
 drawRestaurant = () => {
   fetchRestaurantFromURL((error, restaurant) => {
     self.restaurant = restaurant;
+
     if (error) console.error(error);
-    else fillBreadcrumb();
+    else {
+      fillBreadcrumb();
+      lazyLoadStaticGoogleMap();
+    }
   });
-};
-
-/**
- * Initialize Google map & load restaurant details
- */
-initMap = () => {
-  self.map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 16,
-    center: self.restaurant.latlng,
-    scrollwheel: false
-  });
-
-  DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
 };
 
 /**
@@ -149,30 +124,38 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
  * @param {Object} restaurant
  */
 fillReviewsHTML = (restaurant = self.restaurant) => {
-  let reviewsList;
-
-  if (self.restaurant.reviews) reviewsList = self.restaurant.reviews;
-  else
+  if (self.restaurant.reviews)
+    drawReviews(self.restaurant.reviews);
+  else {
     DBHelper.fetchReviewsByRestaurantId(restaurant.id, (error, reviews) => {
       if (!reviews) return console.error(error);
 
-      reviewsList = self.restaurant.reviews = reviews;
+      self.restaurant.reviews = reviews;
 
-      const container = document.getElementById('reviews-container');
-
-      if (!reviewsList) {
-        const noReviews = document.createElement('p');
-        noReviews.innerHTML = 'No reviews yet!';
-        container.appendChild(noReviews);
-        return;
-      }
-      const ul = document.getElementById('reviews-list');
-      reviewsList.forEach(review => {
-        ul.appendChild(createReviewHTML(review));
-      });
-      container.appendChild(ul);
+      drawReviews(reviews);
     });
+  }
 };
+
+/**
+ * Draw reviews DOM
+ * @param {Array} reviewsList - array of restaurant reviews
+ */
+drawReviews = (reviewsList) => {
+  const container = document.getElementById('reviews-container');
+
+  if (!reviewsList || reviewsList && reviewsList.length === 0) {
+    const noReviews = document.createElement('p');
+    noReviews.innerHTML = 'No reviews yet!';
+    container.appendChild(noReviews);
+    return;
+  }
+  const ul = document.getElementById('reviews-list');
+  reviewsList.forEach(review => {
+    ul.appendChild(createReviewHTML(review));
+  });
+  container.appendChild(ul);
+}
 
 /**
  * Create review HTML and add it to the webpage
@@ -196,7 +179,7 @@ createReviewHTML = review => {
   li.appendChild(rating);
 
   const comments = document.createElement('p');
-  comments.classList.add('review-comment'); 
+  comments.classList.add('review-comment');
   comments.innerHTML = review.comments;
   li.appendChild(comments);
 
@@ -231,15 +214,73 @@ getParameterByName = (name, url) => {
 };
 
 /**
- * Async add google map
+ * Async add dynamic google map
  */
-addGoogleMap = () => {
+loadDynamicGoogleMap = () => {
   let script = document.createElement('script');
 
   script.type = 'text/javascript';
   script.src = `https://maps.googleapis.com/maps/api/js?key=${MAP_API_KEY}&callback=initMap`;
   document.body.appendChild(script);
 };
+
+/**
+ * Initialize dynamic Google map & add marker
+ */
+initMap = () => {
+  self.map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 16,
+    center: self.restaurant.latlng,
+    scrollwheel: false
+  });
+
+  DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
+};
+
+/**
+ * Generate static map URL and add image
+ * @param {Object} restaurant
+ */
+loadStaticGoogleMap = (restaurant = self.restaurant) => {
+  if (!restaurant) return;
+
+  const SIZE = 400,
+    ZOOM = 16,
+    MARKER_COLOR = 'red';
+
+  let coord = (Object.values(restaurant.latlng)).toString(),
+    map = document.getElementById('map'),
+    url = `https://maps.googleapis.com/maps/api/staticmap?size=${SIZE}x${SIZE}&zoom=${ZOOM}&key=${STATIC_MAP_API_KEY}&center=${coord}&markers=color:${MARKER_COLOR}|${coord}`,
+    img = document.createElement('img');
+
+  img.classList.add('static-google-map');
+  img.src = url;
+  img.alt = 'Static Google Map';
+  img.addEventListener('click', loadDynamicGoogleMap);
+  map.appendChild(img);
+}
+
+/**
+ * Load google map only when it's container becomes visible
+ */
+lazyLoadStaticGoogleMap = () => {
+  const observerOptions = {
+      threshold: [1.0]
+    },
+    map = document.getElementById('map'),
+    observer = new IntersectionObserver(
+      entry => {
+        entry.forEach(change => {
+          if (change.isIntersecting) {
+            loadStaticGoogleMap(self.restaurant);
+
+            observer.unobserve(map);
+          }
+        });
+      }, observerOptions);
+
+  observer.observe(map);
+}
 
 /**
  * Load page images after restaurant DOM has been added

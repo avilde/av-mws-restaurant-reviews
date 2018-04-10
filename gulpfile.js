@@ -93,10 +93,7 @@ gulp.task('sass-prod', () => {
 gulp.task('minify-list-dev', () => {
   return gulp
     .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
-    .pipe(sourcemaps.init())
     .pipe(concat('restaurant_list.js'))
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(cfg.destJs));
 });
 
@@ -113,10 +110,7 @@ gulp.task('minify-list-prod', () => {
 gulp.task('minify-details-dev', () => {
   return gulp
     .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
-    .pipe(sourcemaps.init())
     .pipe(concat('restaurant_details.js'))
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./'))
     .pipe(gulp.dest(cfg.destJs));
 });
 
@@ -162,7 +156,7 @@ gulp.task('dev-html', () => {
 });
 
 // html files (minify HTML files & inline css/js)
-gulp.task('inline-html', function() {
+gulp.task('inline-html', function () {
   return gulp
     .src(`${cfg.tmp}*.html`)
     .pipe(
@@ -194,12 +188,12 @@ gulp.task('watch', () => {
   util.log(util.colors.bold(util.colors.cyan('[gulp-watch]'), util.colors.white('starting watch...')));
   // js 
   gulp.watch(`${cfg.srcJs}/*`, ['minify-list-dev', 'minify-details-dev']);
-   // css
-   gulp.watch(cfg.srcCss, ['sass-dev']);
-   // img
-   gulp.watch(cfg.srcImg, ['images']);
-   // html
-   gulp.watch(`${cfg.src}*.html`, ['dev-html']);
+  // css
+  gulp.watch(cfg.srcCss, ['sass-dev']);
+  // img
+  gulp.watch(cfg.srcImg, ['images']);
+  // html
+  gulp.watch(`${cfg.src}*.html`, ['dev-html']);
 })
 
 /**
@@ -211,20 +205,19 @@ gulp.task('watch', () => {
 
 gulp.task('build-prod', seq('clean', 'tmp-html', 'root-files', 'lint', 'images', 'sass-prod', 'minify-list-prod', 'minify-details-prod', 'minify-sw-prod', 'inline-html', 'clean-tmp'));
 
-gulp.task('build-dev', seq('clean', ['root-files', 'lint', 'images', 'sass-dev', 'minify-list-dev', 'minify-details-dev', 'minify-sw-dev'], 'dev-html','watch'));
+gulp.task('build-dev', seq('clean', ['root-files', 'lint', 'images', 'sass-dev', 'minify-list-dev', 'minify-details-dev', 'minify-sw-dev'], 'dev-html', 'watch'));
 
 /**
  * [ SERVER ]
  *  run localhost server
  */
 gulp.task('server', () => {
-  browserSync.init(
-    {
+  browserSync.init({
       server: cfg.dest,
       port: 8000,
       ui: false
     },
-    function(err, bs) {
+    function (err, bs) {
       bs.addMiddleware('*', gStatic, {
         override: true
       });

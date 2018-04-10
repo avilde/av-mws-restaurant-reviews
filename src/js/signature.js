@@ -1,6 +1,7 @@
 const APP_NAME = 'av-rr';
 
-const MAP_API_KEY = 'AIzaSyB1eWmbJ77N0GZFASeLjh0oMWGAi0BKnHc';
+const MAP_API_KEY = 'AIzaSyCSPE2b5yv7k7CvRctNKvGl42FXfMr-DeU',
+    STATIC_MAP_API_KEY = 'AIzaSyBC8fMCdTyXKxZmNEe6aMXOIoM6AR_Pgak';
 
 // my signature
 console.log(

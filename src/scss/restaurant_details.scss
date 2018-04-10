@@ -33,7 +33,7 @@ p,
 td,
 th,
 ul {
-  font-size: 10pt;
+  font-size: 12pt;
   color: #333;
 }
 
@@ -109,23 +109,6 @@ section {
   text-transform: uppercase;
 }
 
-div.author {
-  font-size: 10px;
-  border-top: 1px solid #696868;
-  padding-top: 10px;
-  margin: 5px 50px 0;
-}
-
-div.author>span.made-by {
-  text-transform: initial;
-  padding-right: 5px;
-}
-
-div.author>span.author-name {
-  color: #6ac2ff;
-  font-weight: 700;
-}
-
 nav {
   height: 80px;
   line-height: 80px;
@@ -156,9 +139,13 @@ nav h1 img.app-logo {
   padding: 10px 40px 16px;
   list-style: none;
   background-color: #eee;
-  font-size: 17px;
   margin: 0;
   width: 100vw;
+}
+
+#breadcrumb a,
+#breadcrumb li {
+  font-size: 17px;
 }
 
 #breadcrumb li {
@@ -224,7 +211,13 @@ nav h1 img.app-logo {
   background-color: #ccc;
   width: 400px;
   height: 400px;
-  padding: 15px;
+  margin: 15px;
+}
+
+.inside #map img.static-google-map {
+  cursor: pointer;
+  width: inherit;
+  height: inherit;
 }
 
 .inside .section-title {
@@ -254,10 +247,11 @@ nav h1 img.app-logo {
 
 #restaurant-img {
   width: 100%;
+  max-height: 642.5px;
 }
 
 #restaurant-address {
-  font-size: 12pt;
+  font-size: 18px;
   margin: 10px 0px;
 }
 
@@ -285,6 +279,7 @@ nav h1 img.app-logo {
 #reviews-list {
   margin: 0;
   padding: 0;
+  margin-bottom: 35px;
 }
 
 #reviews-list li {
@@ -342,29 +337,32 @@ p.review-rating span {
 span#favorite.favorite-restaurant {
   display: block;
   color: white;
-  border: 2px solid white;
+  border: 1px solid white;
+  border-radius: 50%;
   width: 30px;
   height: 30px;
   margin: 5px;
   background: $base-color;
-  opacity: 0.3;
+  opacity: .3;
   text-align: center;
   line-height: 30px;
   font-size: 20px;
 }
 
 span#favorite.favorite-restaurant:hover {
-  opacity: 0.9;
+  opacity: .9;
   color: #dcd73e;
   cursor: pointer;
 }
 
 span#favorite.favorite-restaurant:active {
-  color: #fffb7e;
+  opacity: .7;
+  outline: none;
+  color: white;
 }
 
 span#favorite:hover span {
-  opacity: 0.5;
+  opacity: .5;
 }
 
 span#favorite.favorite-restaurant.is-favorite {
@@ -492,6 +490,8 @@ fieldset.rating>label:hover~input:checked~label {
   color: $base-light;
 }
 
+/* Media Queries */
+
 @media screen and (max-width: 900px) {
   .inside .restaurant-title {
     margin-top: 125px;
@@ -507,7 +507,7 @@ fieldset.rating>label:hover~input:checked~label {
   .inside #map {
     width: 300px;
     height: 300px;
-    padding: 10px;
+    margin: 10px;
   }
   .inside .restaurant-details>.restaurant-addr-hours {
     display: flex;
@@ -563,28 +563,37 @@ fieldset.rating>label:hover~input:checked~label {
     margin-left: 64px;
   }
   #reviews-list li p {
-    font-size: 1.1em;
+    padding-left: 5px;
+    padding-right: 5px;
   }
   .new-review-container>div.row {
     flex-wrap: wrap;
   }
-  #favorite {
+  span#favorite.favorite-restaurant {
     margin: 10px;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    font-size: 25px;
   }
 }
 
 @media screen and (min-width: 0px) and (max-width:420px) {
   .inside #map {
-    width: 250px;
-    height: 250px;
-    padding: 5px;
+    margin: 5px;
   }
   .inside .restaurant-details>.restaurant-addr-hours {
     min-width: 250px;
     padding: 5px;
   }
-
   #maincontent {
     padding-bottom: 10px;
+  }
+  #breadcrumb a,
+  #breadcrumb li {
+    font-size: 20px;
+  }
+  span#favorite.favorite-restaurant {
+    margin: 15px;
   }
 }
