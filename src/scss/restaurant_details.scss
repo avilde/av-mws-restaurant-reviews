@@ -577,13 +577,14 @@ div.my-review-msg.success {
   }
   .new-review-container .my-name,
   .new-review-container .my-comment {
-    min-width: 150px;
+    min-width: 200px;
   }
   fieldset.rating:not(:checked)>label {
     width: 20px;
     height: 20px;
     line-height: 20px;
     padding: 10px;
+    font-size: 30px;
   }
   footer {
     font-size: 16px;
@@ -618,7 +619,9 @@ div.my-review-msg.success {
 
 @media screen and (min-width: 0px) and (max-width:420px) {
   .inside #map {
-    margin: 5px;
+    margin: 5px 0;
+    width: 280px;
+    height: 280px;
   }
   .inside .restaurant-details>.restaurant-addr-hours {
     min-width: 250px;
@@ -630,5 +633,9 @@ div.my-review-msg.success {
   #breadcrumb a,
   #breadcrumb li {
     font-size: 20px;
+  }
+
+  #rating-msg {
+    display: none;
   }
 }

@@ -308,12 +308,19 @@ class DBHelper {
     return idb.open(DBHelper.DB_NAME, DBHelper.DB_VER, upgrade => {
       const storeRestaurants = upgrade.createObjectStore(DBHelper.STORE_RESTAURANTS, {
         keyPath: 'id',
-        autoIncrement:true
+        autoIncrement: true
+      });
+      storeRestaurants.createIndex('name', 'name', {
+        unique: false
       });
 
       const storeReviews = upgrade.createObjectStore(DBHelper.STORE_REVIEWS, {
         keyPath: 'id',
         autoIncrement: true
+      });
+
+      storeReviews.createIndex('name', 'name', {
+        unique: false
       });
 
     });
@@ -352,7 +359,8 @@ class DBHelper {
                   .objectStore(DBHelper.STORE_RESTAURANTS);
 
                 restaurants.map(restaurant => {
-                  restaurant.pendingUpdate = false;
+                  if (!restaurant.hasOwnProperty('pendingUpdate'))
+                    restaurant.pendingUpdate = false;
                   store.put(restaurant);
                 });
               });
@@ -392,7 +400,8 @@ class DBHelper {
               // tranform reviews
               if (reviews && reviews.length > 0) {
                 reviews.map(review => {
-                  review.pendingUpdate = false;
+                  if (!restaurant.hasOwnProperty('pendingUpdate'))
+                    review.pendingUpdate = false;
                   review.createdAt = new Date(review.createdAt).valueOf();
                   review.updatedAt = new Date(review.updatedAt).valueOf();
                 });
@@ -602,6 +611,7 @@ class DBHelper {
       })
       .catch(e => {
         console.error(`[${APP_NAME}] put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
+        restaurant.pendingUpdate = true;
       });
 
     // update idb record
@@ -629,8 +639,10 @@ class DBHelper {
         body: JSON.stringify(review)
       })
       .then(resp => {
-        if (resp.status != 201)
-          console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+        if (resp.status != 201) {
+          console.error(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+          review.pendingUpdate = true;
+        }
 
         return resp.json();
       })
@@ -648,6 +660,7 @@ class DBHelper {
       })
       .catch(e => {
         console.error(`[${APP_NAME}] post review request failed. Error: ${e}`);
+        review.pendingUpdate = true;
       });
 
     // add idb record
@@ -659,6 +672,30 @@ class DBHelper {
         .objectStore(DBHelper.STORE_REVIEWS);
 
       store.put(review);
+    });
+  }
+
+  static getPendingRestaurants() {
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+      const store = db
+        .transaction(DBHelper.STORE_RESTAURANTS, 'readwrite')
+        .objectStore(DBHelper.STORE_RESTAURANTS);
+
+      store.get('pending-updates');
+    });
+  }
+
+  static getPendingReviews() {
+    DBHelper.getDb().then(db => {
+      if (!db) return;
+
+      const store = db
+        .transaction(DBHelper.STORE_REVIEWS, 'readwrite')
+        .objectStore(DBHelper.STORE_REVIEWS);
+
+      store.get('pending-updates');
     });
   }
 }
