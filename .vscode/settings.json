@@ -1,4 +1,4 @@
 {
-    "prettier.bracketSpacing": false,
-    "files.autoSave": "off"
+    "files.autoSave": "off",
+    "git.confirmSync": false
 }
