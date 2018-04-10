@@ -126,17 +126,16 @@ gulp.task('minify-details-prod', () => {
 // minify service worker code
 gulp.task('minify-sw-prod', () => {
   return gulp
-    .src([`${cfg.src}/sw.js`])
+    .src([`${cfg.src}/sw.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`])
+    .pipe(concat('sw.js'))
     .pipe(uglify())
     .pipe(gulp.dest(cfg.dest));
 });
 
 gulp.task('minify-sw-dev', () => {
   return gulp
-    .src([`${cfg.src}/sw.js`])
-    .pipe(sourcemaps.init())
-    .pipe(uglify())
-    .pipe(sourcemaps.write('./'))
+    .src([`${cfg.src}/sw.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`])
+    .pipe(concat('sw.js'))
     .pipe(gulp.dest(cfg.dest));
 });
 
@@ -156,7 +155,7 @@ gulp.task('dev-html', () => {
 });
 
 // html files (minify HTML files & inline css/js)
-gulp.task('inline-html', function () {
+gulp.task('inline-html', function() {
   return gulp
     .src(`${cfg.tmp}*.html`)
     .pipe(
@@ -186,7 +185,7 @@ gulp.task('clean-tmp', cb => {
 // watch src files for changes
 gulp.task('watch', () => {
   util.log(util.colors.bold(util.colors.cyan('[gulp-watch]'), util.colors.white('starting watch...')));
-  // js 
+  // js
   gulp.watch(`${cfg.srcJs}/*`, ['minify-list-dev', 'minify-details-dev']);
   // css
   gulp.watch(cfg.srcCss, ['sass-dev']);
@@ -194,7 +193,9 @@ gulp.task('watch', () => {
   gulp.watch(cfg.srcImg, ['images']);
   // html
   gulp.watch(`${cfg.src}*.html`, ['dev-html']);
-})
+  // service worker
+  gulp.watch(`${cfg.src}sw.js`, ['minify-sw-dev']);
+});
 
 /**
  *  [ BUILD ]
@@ -212,12 +213,13 @@ gulp.task('build-dev', seq('clean', ['root-files', 'lint', 'images', 'sass-dev',
  *  run localhost server
  */
 gulp.task('server', () => {
-  browserSync.init({
+  browserSync.init(
+    {
       server: cfg.dest,
       port: 8000,
       ui: false
     },
-    function (err, bs) {
+    function(err, bs) {
       bs.addMiddleware('*', gStatic, {
         override: true
       });

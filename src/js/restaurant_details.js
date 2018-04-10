@@ -15,6 +15,7 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   drawRestaurant();
   addRatingHandler();
+  syncData();
 });
 
 /**
@@ -411,6 +412,32 @@ addRatingHandler = () => {
     label.addEventListener('click', () => {
       ratingMsg.innerHTML = label.getAttribute('title');
       rating.setAttribute('rating', label.getAttribute('value'));
+    });
+  });
+}
+
+/**
+ * Sync database data (restaurants & reviews)
+ */
+syncData = () => {
+  // sync restaurants
+  DBHelper.fetchRestaurants((error, restaurants) => {
+    let pendingRestaurants = restaurants.filter(r => r.pendingUpdate === true);
+
+    pendingRestaurants.forEach((restaurant, idx) => {
+      DBHelper.favoriteRestaurant(restaurant, restaurant.is_favorite);
+      // TODO: set pending flag false
+    });
+  });
+
+  // sync reviews
+  DBHelper.fetchReviews((error, reviews) => {
+    let pendingReviews = reviews.filter(r => r.pendingUpdate === true);
+
+    pendingReviews.forEach((review, idx) => {
+      DBHelper.insertReview(review);
+      // TODO: delete temporary review from idb
+      // TODO: insert from server newly added review
     });
   });
 }

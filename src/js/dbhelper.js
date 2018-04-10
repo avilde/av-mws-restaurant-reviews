@@ -47,7 +47,7 @@ class DBHelper {
         keyPath: 'id',
         autoIncrement: true
       });
-      storeRestaurants.createIndex('name', 'name', {
+      storeRestaurants.createIndex('pending-updates', 'pendingUpdate', {
         unique: false
       });
 
@@ -56,10 +56,9 @@ class DBHelper {
         autoIncrement: true
       });
 
-      storeReviews.createIndex('name', 'name', {
+      storeReviews.createIndex('pending-updates', 'pendingUpdate', {
         unique: false
       });
-
     });
   }
 
@@ -83,21 +82,17 @@ class DBHelper {
         else {
           fetch(`${DBHelper.REST_URL}/${DBHelper.STORE_RESTAURANTS}`)
             .then(resp => {
-              if (resp.status !== 200)
-                console.error(`Could not retrieve restaurants data. Status: ${response.status}`);
+              if (resp.status !== 200) console.error(`Could not retrieve restaurants data. Status: ${response.status}`);
               else return resp.json();
             })
             .then(restaurants => {
               DBHelper.getDb().then(db => {
                 if (!db) return;
 
-                const store = db
-                  .transaction(DBHelper.STORE_RESTAURANTS, 'readwrite')
-                  .objectStore(DBHelper.STORE_RESTAURANTS);
+                const store = db.transaction(DBHelper.STORE_RESTAURANTS, 'readwrite').objectStore(DBHelper.STORE_RESTAURANTS);
 
                 restaurants.map(restaurant => {
-                  if (!restaurant.hasOwnProperty('pendingUpdate'))
-                    restaurant.pendingUpdate = false;
+                  if (!restaurant.hasOwnProperty('pendingUpdate')) restaurant.pendingUpdate = false;
                   store.put(restaurant);
                 });
               });
@@ -129,36 +124,31 @@ class DBHelper {
         else {
           fetch(`${DBHelper.REST_URL}/${DBHelper.STORE_REVIEWS}/?restaurant_id=${restaurantId}`)
             .then(resp => {
-              if (resp.status !== 200)
-                console.error(`Could not retrieve reviews data. Status: ${response.status}`);
+              if (resp.status !== 200) console.error(`Could not retrieve reviews data. Status: ${response.status}`);
               else return resp.json();
             })
             .then(reviews => {
               // tranform reviews
               if (reviews && reviews.length > 0) {
                 reviews.map(review => {
-                  if (!restaurant.hasOwnProperty('pendingUpdate'))
-                    review.pendingUpdate = false;
+                  if (!review.hasOwnProperty('pendingUpdate')) review.pendingUpdate = false;
                   review.createdAt = new Date(review.createdAt).valueOf();
                   review.updatedAt = new Date(review.updatedAt).valueOf();
                 });
               }
 
               // save reviews to idb
-              DBHelper.getDb()
-                .then(db => {
-                  if (!db) return;
+              DBHelper.getDb().then(db => {
+                if (!db) return;
 
-                  const store = db
-                    .transaction(DBHelper.STORE_REVIEWS, 'readwrite')
-                    .objectStore(DBHelper.STORE_REVIEWS);
+                const store = db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS);
 
-                  if (reviews && reviews.length > 0) {
-                    reviews.map(review => {
-                      store.put(review);
-                    });
-                  }
-                });
+                if (reviews && reviews.length > 0) {
+                  reviews.map(review => {
+                    store.put(review);
+                  });
+                }
+              });
 
               return callback(null, reviews);
             });
@@ -174,15 +164,12 @@ class DBHelper {
    */
   static fetchReviewsByRestaurantId(id, callback) {
     DBHelper.fetchReviews(id, (error, reviews) => {
-      if (error)
-        callback(error, null);
+      if (error) callback(error, null);
       else {
         const reviewsList = reviews; //.filter(review => review.restaurant_id == id);
 
-        if (reviewsList)
-          callback(null, reviewsList);
-        else
-          callback(`[${APP_NAME}] reviews for restaurant id '${id}' do not exist`, null);
+        if (reviewsList) callback(null, reviewsList);
+        else callback(`[${APP_NAME}] reviews for restaurant id '${id}' do not exist`, null);
       }
     });
   }
@@ -194,14 +181,11 @@ class DBHelper {
    */
   static fetchRestaurantById(id, callback) {
     DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error)
-        callback(error, null);
+      if (error) callback(error, null);
       else {
         const restaurant = restaurants.find(restaurant => restaurant.id == id);
-        if (restaurant)
-          callback(null, restaurant);
-        else
-          callback(`[${APP_NAME}] restaurant '${restaurant}' does not exist`, null);
+        if (restaurant) callback(null, restaurant);
+        else callback(`[${APP_NAME}] restaurant '${restaurant}' does not exist`, null);
       }
     });
   }
@@ -213,10 +197,8 @@ class DBHelper {
    */
   static fetchRestaurantByCuisine(cuisine, callback) {
     DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error)
-        callback(error, null);
-      else
-        callback(null, restaurants.filter(restaurant => restaurant.cuisine_type === cuisine));
+      if (error) callback(error, null);
+      else callback(null, restaurants.filter(restaurant => restaurant.cuisine_type === cuisine));
     });
   }
 
@@ -227,10 +209,8 @@ class DBHelper {
    */
   static fetchRestaurantByNeighborhood(neighborhood, callback) {
     DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error)
-        callback(error, null);
-      else
-        callback(null, restaurants.filter(restaurant => restaurant.neighborhood === neighborhood));
+      if (error) callback(error, null);
+      else callback(null, restaurants.filter(restaurant => restaurant.neighborhood === neighborhood));
     });
   }
 
@@ -240,14 +220,9 @@ class DBHelper {
    * @param {String} neighborhood - type of neighborhood to search for
    * @param {Function} callback - callback function
    */
-  static fetchRestaurantByCuisineAndNeighborhood(
-    cuisine,
-    neighborhood,
-    callback
-  ) {
+  static fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, callback) {
     DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error)
-        callback(error, null);
+      if (error) callback(error, null);
       else {
         let results = restaurants;
         if (cuisine !== 'all') {
@@ -269,8 +244,7 @@ class DBHelper {
    */
   static fetchNeighborhoods(callback) {
     DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error)
-        callback(error, null);
+      if (error) callback(error, null);
       else {
         const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood);
         const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) === i);
@@ -286,8 +260,7 @@ class DBHelper {
    */
   static fetchCuisines(callback) {
     DBHelper.fetchRestaurants((error, restaurants) => {
-      if (error)
-        callback(error, null);
+      if (error) callback(error, null);
       else {
         const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
         const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) === i);
@@ -309,9 +282,7 @@ class DBHelper {
    * @param {Object} restaurant - restaurant object to be used to fill url
    */
   static imageUrlForRestaurant(restaurant) {
-    return restaurant && restaurant.photograph ?
-      `img/${restaurant.photograph}.webp` :
-      'img/no-image.svg';
+    return restaurant && restaurant.photograph ? `img/${restaurant.photograph}.webp` : 'img/no-image.svg';
   }
 
   /**
@@ -340,11 +311,10 @@ class DBHelper {
     restaurant.is_favorite = state;
 
     fetch(`${DBHelper.REST_URL}/restaurants/${restaurant.id}/?is_favorite=${state}`, {
-        method: 'PUT'
-      })
+      method: 'PUT'
+    })
       .then(resp => {
-        if (resp.status != 200)
-          console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+        if (resp.status != 200) console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
       })
       .catch(e => {
         console.error(`[${APP_NAME}] put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
@@ -355,9 +325,7 @@ class DBHelper {
     DBHelper.getDb().then(db => {
       if (!db) return;
 
-      const store = db
-        .transaction(DBHelper.STORE_RESTAURANTS, 'readwrite')
-        .objectStore(DBHelper.STORE_RESTAURANTS);
+      const store = db.transaction(DBHelper.STORE_RESTAURANTS, 'readwrite').objectStore(DBHelper.STORE_RESTAURANTS);
 
       store.put(restaurant);
     });
@@ -370,30 +338,15 @@ class DBHelper {
   static insertReview(review) {
     if (!review) return;
 
-
     fetch(`${DBHelper.REST_URL}/reviews`, {
-        method: 'POST',
-        body: JSON.stringify(review)
-      })
+      method: 'POST',
+      body: JSON.stringify(review)
+    })
       .then(resp => {
         if (resp.status != 201) {
           console.error(`[${APP_NAME}] response was not successful. Response: ${resp}`);
           review.pendingUpdate = true;
         }
-
-        return resp.json();
-      })
-      .then(data => {
-        // update idb record
-        DBHelper.getDb().then(db => {
-          if (!db) return;
-
-          const store = db
-            .transaction(DBHelper.STORE_RESTAURANTS, 'readwrite')
-            .objectStore(DBHelper.STORE_RESTAURANTS);
-
-          store.put(data);
-        });
       })
       .catch(e => {
         console.error(`[${APP_NAME}] post review request failed. Error: ${e}`);
@@ -404,39 +357,12 @@ class DBHelper {
     DBHelper.getDb().then(db => {
       if (!db) return;
 
-      const store = db
-        .transaction(DBHelper.STORE_REVIEWS, 'readwrite')
-        .objectStore(DBHelper.STORE_REVIEWS);
+      const store = db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS);
 
       store.put(review);
     });
   }
-
-  static getPendingRestaurants() {
-    DBHelper.getDb().then(db => {
-      if (!db) return;
-
-      const store = db
-        .transaction(DBHelper.STORE_RESTAURANTS, 'readwrite')
-        .objectStore(DBHelper.STORE_RESTAURANTS);
-
-      store.get('pending-updates');
-    });
-  }
-
-  static getPendingReviews() {
-    DBHelper.getDb().then(db => {
-      if (!db) return;
-
-      const store = db
-        .transaction(DBHelper.STORE_REVIEWS, 'readwrite')
-        .objectStore(DBHelper.STORE_REVIEWS);
-
-      store.get('pending-updates');
-    });
-  }
 }
-
 
 /**
  * Covert string to boolean
@@ -446,11 +372,11 @@ stringToBoolean = str => {
   if (typeof str === 'string') {
     switch (str.toLowerCase().trim()) {
       case 'true':
-      case 'yes':
+      case true:
       case '1':
         return true;
       case 'false':
-      case 'no':
+      case false:
       case '0':
       case null:
         return false;
@@ -458,4 +384,4 @@ stringToBoolean = str => {
   }
 
   return Boolean(str);
-}
+};
