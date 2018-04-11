@@ -178,13 +178,6 @@ createReviewHTML = review => {
   name.classList.add('review-name');
   name.innerHTML = review.name;
 
-  if (review.pendingUpdate === 'yes') {
-    const pending = document.createElement('span');
-    pending.classList.add('pending-warning');
-    pending.innerHTML = '&#9888;';
-    name.appendChild(pending);
-  }
-
   li.appendChild(name);
 
   const date = document.createElement('span');
@@ -413,7 +406,12 @@ addRatingHandler = () => {
     });
 
     label.addEventListener('mouseout', () => {
-      if (!rating.getAttribute('rating'))
+      let ratingValue = rating.getAttribute('rating'),
+        selectedStar = document.querySelector(`label.rating-label[value="${ratingValue}"]`);
+
+      if (ratingValue && selectedStar)
+        ratingMsg.innerHTML = selectedStar.getAttribute('title');
+      else if (!ratingValue)
         ratingMsg.innerHTML = '';
     });
 

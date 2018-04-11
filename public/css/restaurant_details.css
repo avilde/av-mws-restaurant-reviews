@@ -430,7 +430,7 @@ fieldset.rating > label:hover ~ input:checked ~ label {
 span#rating-msg {
   color: #46589d;
   font-size: 16px;
-  font-weight: bold;
+  margin-top: -5px;
   margin-left: 5px; }
 
 div.my-review-msg {

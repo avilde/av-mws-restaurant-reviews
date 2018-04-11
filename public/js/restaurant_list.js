@@ -634,7 +634,10 @@ class DBHelper {
   static insertReview(review) {
     if (!review) return;
 
-    let rev = fetch(`${DBHelper.REST_URL}/reviews`, {
+    if (review.hasOwnProperty('id'))
+      delete review.id;
+
+    fetch(`${DBHelper.REST_URL}/reviews`, {
         method: 'POST',
         body: JSON.stringify(review)
       })
@@ -646,32 +649,45 @@ class DBHelper {
         return resp.json();
       })
       .then(rev => {
+        d('record from server', rev.id);
+        // tranform review before insert
+        if (!rev.hasOwnProperty('pendingUpdate'))
+          rev.pendingUpdate = 'no';
+
+        rev.createdAt = new Date(rev.createdAt).valueOf();
+        rev.updatedAt = new Date(rev.updatedAt).valueOf();
+
+        review = rev;
+
         DBHelper.insertReviewInDb(rev, () => {
-          return rev;
+          d('server record inserted', rev.id);
         });
       })
       .catch(err => {
         d(`post review request failed. Error: ${err}`);
         review.pendingUpdate = 'yes';
         // insert temporary idb record
-        DBHelper.insertReviewInDb(review);
+        DBHelper.insertReviewInDb(review, () => {
+          d('pending record inserted', review);
+          review = review;
+        });
 
         return review;
       })
 
-    return rev;
+    return review;
   }
 
   /**
    * Insert new db review
    * @param {Object} review 
+   * @param {Function} callback *optional
    */
   static insertReviewInDb(review, callback) {
     DBHelper.getDb()
       .then(db => {
         if (!db) return;
         db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS).put(review);
-
         if (typeof callback === 'function') callback();
       })
       .catch(err => {
@@ -681,14 +697,16 @@ class DBHelper {
 
   /**
    * Delete a review from database
+   * @param {String} reviewId
+   * @param {Function} callback *optional
    */
   static deleteReviewFromDb(reviewId, callback) {
     DBHelper.getDb()
       .then(db => {
         if (!db) return;
         db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS).delete(reviewId);
-
-        callback();
+        d(`review ${reviewId} deleted`);
+        if (typeof callback === 'function') callback();
       })
       .catch(err => {
         d(`delete review from db failed. Error: ${err}`);
@@ -699,7 +717,7 @@ class DBHelper {
    * Sync database data (restaurants & reviews)
    */
   static syncData() {
-    // sync restaurants
+    // restaurants
     DBHelper.fetchRestaurants((error, restaurants) => {
       let pendingRestaurants = restaurants.filter(r => r.pendingUpdate === 'yes');
 
@@ -709,7 +727,7 @@ class DBHelper {
       });
     });
 
-    // sync reviews
+    //reviews
     DBHelper.getDb()
       .then(db => {
         if (!db) return;
@@ -724,10 +742,8 @@ class DBHelper {
 
         let review = cursor.value;
 
-        console.log(review);
-
         DBHelper.deleteReviewFromDb(review.id, () => {
-          delete review.pendingUpdate;
+          review.pendingUpdate = 'no';
           DBHelper.insertReview(review);
         });
 
