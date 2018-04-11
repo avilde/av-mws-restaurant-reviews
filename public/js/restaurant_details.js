@@ -588,9 +588,12 @@ class DBHelper {
           .transaction(DBHelper.STORE_REVIEWS)
           .objectStore(DBHelper.STORE_REVIEWS)
           .getAll();
+
       })
       .then(data => {
         // return idb restaurant data if found (up-to-date data)
+        data = data.filter(review => review.restaurant_id === restaurantId);
+
         if (data && data.length > 0) return callback(null, data);
         else {
           fetch(`${DBHelper.REST_URL}/${DBHelper.STORE_REVIEWS}/?restaurant_id=${restaurantId}`)
