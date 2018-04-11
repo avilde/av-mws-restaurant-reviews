@@ -1,8 +1,45 @@
-const APP_NAME = 'av-rr';
+/**
+ * Global constants
+ */
+const APP_NAME = 'av-rr',
+    DEBUG_MODE = true;
 
+/** Google MAPS API */
 const MAP_API_KEY = 'AIzaSyCSPE2b5yv7k7CvRctNKvGl42FXfMr-DeU',
     STATIC_MAP_API_KEY = 'AIzaSyBC8fMCdTyXKxZmNEe6aMXOIoM6AR_Pgak';
 
+/**
+ * Covert string to boolean
+ * @param {any} str string variable (if other then evaluate if bool)
+ */
+stringToBoolean = str => {
+    if (typeof str === 'string') {
+        switch (str.toLowerCase().trim()) {
+            case 'true':
+            case 'yes':
+            case true:
+            case '1':
+                return true;
+            case 'false':
+            case 'no':
+            case false:
+            case '0':
+            case null:
+                return false;
+        }
+    }
+
+    return Boolean(str);
+};
+
+/**
+ * Debug code if debug mode is on
+ * @param {any} args - rest of args
+ */
+function d(...args) {
+    if (DEBUG_MODE)
+        console.info(`[${APP_NAME}]`, ...args);
+}
 // my signature
 console.log(
     `%c ${APP_NAME} %c restaurant reviews `,
@@ -53,10 +90,8 @@ addGoogleMap = () => {
  */
 fetchNeighborhoods = () => {
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
-    if (error) {
-      // Got an error
-      console.error(error);
-    } else {
+    if (error) d(error);
+    else {
       self.neighborhoods = neighborhoods;
       fillNeighborhoodsHTML();
     }
@@ -82,10 +117,8 @@ fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
  */
 fetchCuisines = () => {
   DBHelper.fetchCuisines((error, cuisines) => {
-    if (error) {
-      // Got an error!
-      console.error(error);
-    } else {
+    if (error) d(error);
+    else {
       self.cuisines = cuisines;
       fillCuisinesHTML();
     }
@@ -138,7 +171,7 @@ updateRestaurants = () => {
   const neighborhood = nSelect[nIndex].value;
 
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
-    if (error) console.error(error);
+    if (error) d(error);
     else {
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
@@ -191,12 +224,13 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  * @param {Object} restaurant - restaurant
  */
 createRestaurantHTML = restaurant => {
-  const li = document.createElement('li');
+  const li = document.createElement('li'),
+    imageUrl = DBHelper.imageUrlForRestaurant(restaurant);
   li.setAttribute('restaurant-id', restaurant.id);
 
   const image = document.createElement('img');
-  image.className = 'restaurant-img lozad';
-  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
+  image.className = `restaurant-img lozad${imageUrl === 'img/no-image.svg' ? ' no-image' : ''}`;
+  image.setAttribute('data-src', imageUrl);
   image.alt = `Restaurant ${restaurant.name} - cuisine ${restaurant.cuisine_type}`;
   li.append(image);
 
@@ -260,7 +294,6 @@ favoriteRestaurant = (target, restaurant) => {
     DBHelper.favoriteRestaurant(restaurant, true);
   }
 };
-
 /**
  * Common database helper functions
  */
@@ -355,13 +388,13 @@ class DBHelper {
                 const store = db.transaction(DBHelper.STORE_RESTAURANTS, 'readwrite').objectStore(DBHelper.STORE_RESTAURANTS);
 
                 restaurants.map(restaurant => {
-                  if (!restaurant.hasOwnProperty('pendingUpdate')) restaurant.pendingUpdate = false;
+                  if (!restaurant.hasOwnProperty('pendingUpdate')) restaurant.pendingUpdate = 'no';
                   store.put(restaurant);
                 });
               });
               return callback(null, restaurants);
             })
-            .catch(err => console.error(`[${APP_NAME}] request failed: ${err}`));
+            .catch(err => d(`request failed: ${err}`));
         }
       });
   }
@@ -371,7 +404,7 @@ class DBHelper {
    * @param {String} restaurantId
    * @param {Function} callback function to be triggered after reviews are returned
    */
-  static fetchReviews(restaurantId, callback) {
+  static fetchReviewsById(restaurantId, callback) {
     DBHelper.getDb()
       .then(db => {
         if (!db) return;
@@ -394,7 +427,7 @@ class DBHelper {
               // tranform reviews
               if (reviews && reviews.length > 0) {
                 reviews.map(review => {
-                  if (!review.hasOwnProperty('pendingUpdate')) review.pendingUpdate = false;
+                  if (!review.hasOwnProperty('pendingUpdate')) review.pendingUpdate = 'no';
                   review.createdAt = new Date(review.createdAt).valueOf();
                   review.updatedAt = new Date(review.updatedAt).valueOf();
                 });
@@ -417,7 +450,7 @@ class DBHelper {
             });
         }
       })
-      .catch(err => console.error(`[${APP_NAME}] exception in getting reviews: ${err}`));
+      .catch(err => d(`exception in getting reviews: ${err}`));
   }
 
   /**
@@ -426,7 +459,7 @@ class DBHelper {
    * @param {Function} callback - callback function
    */
   static fetchReviewsByRestaurantId(id, callback) {
-    DBHelper.fetchReviews(id, (error, reviews) => {
+    DBHelper.fetchReviewsById(id, (error, reviews) => {
       if (error) callback(error, null);
       else {
         const reviewsList = reviews; //.filter(review => review.restaurant_id == id);
@@ -574,14 +607,14 @@ class DBHelper {
     restaurant.is_favorite = state;
 
     fetch(`${DBHelper.REST_URL}/restaurants/${restaurant.id}/?is_favorite=${state}`, {
-      method: 'PUT'
-    })
+        method: 'PUT'
+      })
       .then(resp => {
         if (resp.status != 200) console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
       })
       .catch(e => {
-        console.error(`[${APP_NAME}] put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
-        restaurant.pendingUpdate = true;
+        d(`put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
+        restaurant.pendingUpdate = 'yes';
       });
 
     // update idb record
@@ -595,60 +628,113 @@ class DBHelper {
   }
 
   /**
-   * Insert user review
-
+   * Post user review to server and insert in db
+   * @param {Object} review
    */
   static insertReview(review) {
     if (!review) return;
 
-    fetch(`${DBHelper.REST_URL}/reviews`, {
-      method: 'POST',
-      body: JSON.stringify(review)
-    })
+    let rev = fetch(`${DBHelper.REST_URL}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify(review)
+      })
       .then(resp => {
         if (resp.status != 201) {
-          console.error(`[${APP_NAME}] response was not successful. Response: ${resp}`);
-          review.pendingUpdate = true;
+          d(`response was not successful. Response: ${resp}`);
+          review.pendingUpdate = 'yes';
         }
+        return resp.json();
       })
-      .catch(e => {
-        console.error(`[${APP_NAME}] post review request failed. Error: ${e}`);
-        review.pendingUpdate = true;
+      .then(rev => {
+        DBHelper.insertReviewInDb(rev, () => {
+          return rev;
+        });
+      })
+      .catch(err => {
+        d(`post review request failed. Error: ${err}`);
+        review.pendingUpdate = 'yes';
+        // insert temporary idb record
+        DBHelper.insertReviewInDb(review);
+
+        return review;
+      })
+
+    return rev;
+  }
+
+  /**
+   * Insert new db review
+   * @param {Object} review 
+   */
+  static insertReviewInDb(review, callback) {
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
+        db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS).put(review);
+
+        if (typeof callback === 'function') callback();
+      })
+      .catch(err => {
+        d(`insert review in db failed. Error: ${err}`);
       });
+  }
 
-    // add idb record
-    DBHelper.getDb().then(db => {
-      if (!db) return;
+  /**
+   * Delete a review from database
+   */
+  static deleteReviewFromDb(reviewId, callback) {
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
+        db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS).delete(reviewId);
 
-      const store = db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS);
+        callback();
+      })
+      .catch(err => {
+        d(`delete review from db failed. Error: ${err}`);
+      });
+  }
 
-      store.put(review);
+  /**
+   * Sync database data (restaurants & reviews)
+   */
+  static syncData() {
+    // sync restaurants
+    DBHelper.fetchRestaurants((error, restaurants) => {
+      let pendingRestaurants = restaurants.filter(r => r.pendingUpdate === 'yes');
+
+      pendingRestaurants.forEach((restaurant, idx) => {
+        DBHelper.favoriteRestaurant(restaurant, restaurant.is_favorite);
+        // TODO: set pending flag false
+      });
     });
+
+    // sync reviews
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
+
+        return db
+          .transaction(DBHelper.STORE_REVIEWS)
+          .objectStore(DBHelper.STORE_REVIEWS)
+          .index('pending-updates').openCursor('yes');
+      })
+      .then(function iterateCursor(cursor) {
+        if (!cursor) return;
+
+        let review = cursor.value;
+
+        console.log(review);
+
+        DBHelper.deleteReviewFromDb(review.id, () => {
+          delete review.pendingUpdate;
+          DBHelper.insertReview(review);
+        });
+
+        return cursor.continue().then(iterateCursor)
+      });
   }
 }
-
-/**
- * Covert string to boolean
- * @param {any} str string variable (if other then evaluate if bool)
- */
-stringToBoolean = str => {
-  if (typeof str === 'string') {
-    switch (str.toLowerCase().trim()) {
-      case 'true':
-      case true:
-      case '1':
-        return true;
-      case 'false':
-      case false:
-      case '0':
-      case null:
-        return false;
-    }
-  }
-
-  return Boolean(str);
-};
-
 'use strict';
 
 (function() {

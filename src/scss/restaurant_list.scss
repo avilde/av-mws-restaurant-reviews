@@ -228,7 +228,6 @@ nav h1 img.app-logo {
   border: 2px solid #ccc;
   font-family: Arial, sans-serif;
   margin: 15px;
-  min-height: 380px;
   padding: 0 20px 25px 20px;
   text-align: left;
   width: 270px;
@@ -243,8 +242,12 @@ nav h1 img.app-logo {
   display: block;
   margin: 0;
   max-width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+#restaurants-list .restaurant-img.no-image {
   max-height: 202.5px;
-  min-width: 100%;
 }
 
 #restaurants-list li .restaurant-name {

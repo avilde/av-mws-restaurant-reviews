@@ -1,4 +1,46 @@
+/**
+ * Global constants
+ */
 const APP_NAME = 'av-rr',
+    DEBUG_MODE = true;
+
+/** Google MAPS API */
+const MAP_API_KEY = 'AIzaSyCSPE2b5yv7k7CvRctNKvGl42FXfMr-DeU',
+    STATIC_MAP_API_KEY = 'AIzaSyBC8fMCdTyXKxZmNEe6aMXOIoM6AR_Pgak';
+
+/**
+ * Covert string to boolean
+ * @param {any} str string variable (if other then evaluate if bool)
+ */
+stringToBoolean = str => {
+    if (typeof str === 'string') {
+        switch (str.toLowerCase().trim()) {
+            case 'true':
+            case 'yes':
+            case true:
+            case '1':
+                return true;
+            case 'false':
+            case 'no':
+            case false:
+            case '0':
+            case null:
+                return false;
+        }
+    }
+
+    return Boolean(str);
+};
+
+/**
+ * Debug code if debug mode is on
+ * @param {any} args - rest of args
+ */
+function d(...args) {
+    if (DEBUG_MODE)
+        console.info(`[${APP_NAME}]`, ...args);
+}
+const
   CACHE_NAME = `${APP_NAME}-static-1`,
   cachedFiles = [
     '/index.html',
@@ -33,30 +75,30 @@ const APP_NAME = 'av-rr',
 self.addEventListener('install', event => {
   event.waitUntil(
     caches
-      .open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(cachedFiles);
-      })
-      .catch(e => console.error(`[${APP_NAME}] (install) caching error: ${e}`))
+    .open(CACHE_NAME)
+    .then(cache => {
+      return cache.addAll(cachedFiles);
+    })
+    .catch(e => d(`(install) caching error: ${e}`))
   );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches
-      .keys()
-      .then(cacheNames => {
-        return Promise.all(
-          cacheNames
-            .filter(name => {
-              return name.startsWith('av-rr-') && name !== CACHE_NAME;
-            })
-            .map(name => {
-              return caches.delete(name);
-            })
-        );
-      })
-      .catch(e => console.error(`[${APP_NAME}] (activate) caching error: ${e}`))
+    .keys()
+    .then(cacheNames => {
+      return Promise.all(
+        cacheNames
+        .filter(name => {
+          return name.startsWith('av-rr-') && name !== CACHE_NAME;
+        })
+        .map(name => {
+          return caches.delete(name);
+        })
+      );
+    })
+    .catch(e => d(`(activate) caching error: ${e}`))
   );
 });
 
@@ -64,30 +106,26 @@ self.addEventListener('fetch', event => {
   if (event.request.method === 'GET') {
     // cache only get requests
     event.respondWith(
-      caches
-        .open(CACHE_NAME)
-        .then(cache => {
-          return cache
-            .match(event.request)
-            .then(resp => {
-              return (
-                resp ||
-                fetch(event.request)
-                  .then(resp => {
-                    cache.put(event.request, resp.clone());
+      caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.match(event.request)
+          .then(resp => {
+            return (resp ||
+              fetch(event.request)
+              .then(resp => {
+                cache.put(event.request, resp.clone());
 
-                    return resp;
-                  })
-                  .catch(e => console.error(`[${APP_NAME}] (fetch) error: ${e}`))
-              );
-            })
-            .catch(e => console.error(`[${APP_NAME}] (fetch) exception in cache match. Error: ${e}`));
-        })
-        .catch(e => console.error(`[${APP_NAME}] (fetch) exception when openning cache ${CACHE_NAME}. Error: ${e}`))
+                return resp;
+              })
+              .catch(e => d(`(fetch) error: ${e}`))
+            );
+          })
+          .catch(e => d(`(fetch) exception in cache match. Error: ${e}`));
+      })
+      .catch(e => d(`(fetch) exception when openning cache ${CACHE_NAME}. Error: ${e}`))
     );
   }
 });
-
 /**
  * Common database helper functions
  */
@@ -188,7 +226,7 @@ class DBHelper {
               });
               return callback(null, restaurants);
             })
-            .catch(err => console.error(`[${APP_NAME}] request failed: ${err}`));
+            .catch(err => d(`request failed: ${err}`));
         }
       });
   }
@@ -198,7 +236,7 @@ class DBHelper {
    * @param {String} restaurantId
    * @param {Function} callback function to be triggered after reviews are returned
    */
-  static fetchReviews(restaurantId, callback) {
+  static fetchReviewsById(restaurantId, callback) {
     DBHelper.getDb()
       .then(db => {
         if (!db) return;
@@ -244,7 +282,7 @@ class DBHelper {
             });
         }
       })
-      .catch(err => console.error(`[${APP_NAME}] exception in getting reviews: ${err}`));
+      .catch(err => d(`exception in getting reviews: ${err}`));
   }
 
   /**
@@ -253,7 +291,7 @@ class DBHelper {
    * @param {Function} callback - callback function
    */
   static fetchReviewsByRestaurantId(id, callback) {
-    DBHelper.fetchReviews(id, (error, reviews) => {
+    DBHelper.fetchReviewsById(id, (error, reviews) => {
       if (error) callback(error, null);
       else {
         const reviewsList = reviews; //.filter(review => review.restaurant_id == id);
@@ -401,13 +439,13 @@ class DBHelper {
     restaurant.is_favorite = state;
 
     fetch(`${DBHelper.REST_URL}/restaurants/${restaurant.id}/?is_favorite=${state}`, {
-      method: 'PUT'
-    })
+        method: 'PUT'
+      })
       .then(resp => {
         if (resp.status != 200) console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
       })
       .catch(e => {
-        console.error(`[${APP_NAME}] put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
+        d(`put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
         restaurant.pendingUpdate = 'yes';
       });
 
@@ -422,60 +460,113 @@ class DBHelper {
   }
 
   /**
-   * Insert user review
-
+   * Post user review to server and insert in db
+   * @param {Object} review
    */
   static insertReview(review) {
     if (!review) return;
 
-    fetch(`${DBHelper.REST_URL}/reviews`, {
-      method: 'POST',
-      body: JSON.stringify(review)
-    })
+    let rev = fetch(`${DBHelper.REST_URL}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify(review)
+      })
       .then(resp => {
         if (resp.status != 201) {
-          console.error(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+          d(`response was not successful. Response: ${resp}`);
           review.pendingUpdate = 'yes';
         }
+        return resp.json();
       })
-      .catch(e => {
-        console.error(`[${APP_NAME}] post review request failed. Error: ${e}`);
+      .then(rev => {
+        DBHelper.insertReviewInDb(rev, () => {
+          return rev;
+        });
+      })
+      .catch(err => {
+        d(`post review request failed. Error: ${err}`);
         review.pendingUpdate = 'yes';
+        // insert temporary idb record
+        DBHelper.insertReviewInDb(review);
+
+        return review;
+      })
+
+    return rev;
+  }
+
+  /**
+   * Insert new db review
+   * @param {Object} review 
+   */
+  static insertReviewInDb(review, callback) {
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
+        db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS).put(review);
+
+        if (typeof callback === 'function') callback();
+      })
+      .catch(err => {
+        d(`insert review in db failed. Error: ${err}`);
       });
+  }
 
-    // add idb record
-    DBHelper.getDb().then(db => {
-      if (!db) return;
+  /**
+   * Delete a review from database
+   */
+  static deleteReviewFromDb(reviewId, callback) {
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
+        db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS).delete(reviewId);
 
-      const store = db.transaction(DBHelper.STORE_REVIEWS, 'readwrite').objectStore(DBHelper.STORE_REVIEWS);
+        callback();
+      })
+      .catch(err => {
+        d(`delete review from db failed. Error: ${err}`);
+      });
+  }
 
-      store.put(review);
+  /**
+   * Sync database data (restaurants & reviews)
+   */
+  static syncData() {
+    // sync restaurants
+    DBHelper.fetchRestaurants((error, restaurants) => {
+      let pendingRestaurants = restaurants.filter(r => r.pendingUpdate === 'yes');
+
+      pendingRestaurants.forEach((restaurant, idx) => {
+        DBHelper.favoriteRestaurant(restaurant, restaurant.is_favorite);
+        // TODO: set pending flag false
+      });
     });
+
+    // sync reviews
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
+
+        return db
+          .transaction(DBHelper.STORE_REVIEWS)
+          .objectStore(DBHelper.STORE_REVIEWS)
+          .index('pending-updates').openCursor('yes');
+      })
+      .then(function iterateCursor(cursor) {
+        if (!cursor) return;
+
+        let review = cursor.value;
+
+        console.log(review);
+
+        DBHelper.deleteReviewFromDb(review.id, () => {
+          delete review.pendingUpdate;
+          DBHelper.insertReview(review);
+        });
+
+        return cursor.continue().then(iterateCursor)
+      });
   }
 }
-
-/**
- * Covert string to boolean
- * @param {any} str string variable (if other then evaluate if bool)
- */
-stringToBoolean = str => {
-  if (typeof str === 'string') {
-    switch (str.toLowerCase().trim()) {
-      case 'true':
-      case 'yes':
-      case '1':
-        return true;
-      case 'false':
-      case 'no':
-      case '0':
-      case null:
-        return false;
-    }
-  }
-
-  return Boolean(str);
-};
-
 'use strict';
 
 (function() {

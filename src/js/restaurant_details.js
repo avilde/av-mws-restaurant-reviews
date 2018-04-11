@@ -15,7 +15,7 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   drawRestaurant();
   addRatingHandler();
-  syncData();
+  DBHelper.syncData();
 });
 
 /**
@@ -25,7 +25,7 @@ drawRestaurant = () => {
   fetchRestaurantFromURL((error, restaurant) => {
     self.restaurant = restaurant;
 
-    if (error) console.error(error);
+    if (error) d(error);
     else {
       fillBreadcrumb();
       lazyLoadStaticGoogleMap();
@@ -47,7 +47,7 @@ fetchRestaurantFromURL = callback => {
   else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
       self.restaurant = restaurant;
-      if (!restaurant) return console.error(error);
+      if (!restaurant) return d(error);
 
       fillRestaurantHTML();
       callback(null, restaurant);
@@ -133,7 +133,7 @@ fillReviewsHTML = (restaurant = self.restaurant) => {
     drawReviews(self.restaurant.reviews);
   else {
     DBHelper.fetchReviewsByRestaurantId(restaurant.id, (error, reviews) => {
-      if (!reviews) return console.error(error);
+      if (!reviews) return d(error);
 
       self.restaurant.reviews = reviews;
 
@@ -177,6 +177,14 @@ createReviewHTML = review => {
   const name = document.createElement('p');
   name.classList.add('review-name');
   name.innerHTML = review.name;
+
+  if (review.pendingUpdate === 'yes') {
+    const pending = document.createElement('span');
+    pending.classList.add('pending-warning');
+    pending.innerHTML = '&#9888;';
+    name.appendChild(pending);
+  }
+
   li.appendChild(name);
 
   const date = document.createElement('span');
@@ -362,7 +370,7 @@ validateReview = () => {
     };
 
     // insert review in db
-    DBHelper.insertReview(review);
+    review = DBHelper.insertReview(review);
 
     // cleanup
     name.value = '';
@@ -412,32 +420,6 @@ addRatingHandler = () => {
     label.addEventListener('click', () => {
       ratingMsg.innerHTML = label.getAttribute('title');
       rating.setAttribute('rating', label.getAttribute('value'));
-    });
-  });
-}
-
-/**
- * Sync database data (restaurants & reviews)
- */
-syncData = () => {
-  // sync restaurants
-  DBHelper.fetchRestaurants((error, restaurants) => {
-    let pendingRestaurants = restaurants.filter(r => r.pendingUpdate === true);
-
-    pendingRestaurants.forEach((restaurant, idx) => {
-      DBHelper.favoriteRestaurant(restaurant, restaurant.is_favorite);
-      // TODO: set pending flag false
-    });
-  });
-
-  // sync reviews
-  DBHelper.fetchReviews((error, reviews) => {
-    let pendingReviews = reviews.filter(r => r.pendingUpdate === true);
-
-    pendingReviews.forEach((review, idx) => {
-      DBHelper.insertReview(review);
-      // TODO: delete temporary review from idb
-      // TODO: insert from server newly added review
     });
   });
 }

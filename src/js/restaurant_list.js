@@ -42,10 +42,8 @@ addGoogleMap = () => {
  */
 fetchNeighborhoods = () => {
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
-    if (error) {
-      // Got an error
-      console.error(error);
-    } else {
+    if (error) d(error);
+    else {
       self.neighborhoods = neighborhoods;
       fillNeighborhoodsHTML();
     }
@@ -71,10 +69,8 @@ fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
  */
 fetchCuisines = () => {
   DBHelper.fetchCuisines((error, cuisines) => {
-    if (error) {
-      // Got an error!
-      console.error(error);
-    } else {
+    if (error) d(error);
+    else {
       self.cuisines = cuisines;
       fillCuisinesHTML();
     }
@@ -127,7 +123,7 @@ updateRestaurants = () => {
   const neighborhood = nSelect[nIndex].value;
 
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
-    if (error) console.error(error);
+    if (error) d(error);
     else {
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
@@ -180,12 +176,13 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
  * @param {Object} restaurant - restaurant
  */
 createRestaurantHTML = restaurant => {
-  const li = document.createElement('li');
+  const li = document.createElement('li'),
+    imageUrl = DBHelper.imageUrlForRestaurant(restaurant);
   li.setAttribute('restaurant-id', restaurant.id);
 
   const image = document.createElement('img');
-  image.className = 'restaurant-img lozad';
-  image.setAttribute('data-src', DBHelper.imageUrlForRestaurant(restaurant));
+  image.className = `restaurant-img lozad${imageUrl === 'img/no-image.svg' ? ' no-image' : ''}`;
+  image.setAttribute('data-src', imageUrl);
   image.alt = `Restaurant ${restaurant.name} - cuisine ${restaurant.cuisine_type}`;
   li.append(image);
 

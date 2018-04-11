@@ -92,7 +92,7 @@ gulp.task('sass-prod', () => {
 // bundle code for index.html - DEV
 gulp.task('minify-list-dev', () => {
   return gulp
-    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
+    .src([`${cfg.srcJs}/global.js`, `${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(concat('restaurant_list.js'))
     .pipe(gulp.dest(cfg.destJs));
 });
@@ -100,7 +100,7 @@ gulp.task('minify-list-dev', () => {
 // bundle code for index.html - PROD
 gulp.task('minify-list-prod', () => {
   return gulp
-    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
+    .src([`${cfg.srcJs}/global.js`, `${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_list.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(concat('restaurant_list.js'))
     .pipe(uglify())
     .pipe(gulp.dest(cfg.tmpJs));
@@ -109,7 +109,7 @@ gulp.task('minify-list-prod', () => {
 // bundle code for restaurant.html - DEV
 gulp.task('minify-details-dev', () => {
   return gulp
-    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
+    .src([`${cfg.srcJs}/global.js`, `${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(concat('restaurant_details.js'))
     .pipe(gulp.dest(cfg.destJs));
 });
@@ -117,7 +117,7 @@ gulp.task('minify-details-dev', () => {
 // bundle code for restaurant.html - PROD
 gulp.task('minify-details-prod', () => {
   return gulp
-    .src([`${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
+    .src([`${cfg.srcJs}/global.js`, `${cfg.srcJs}/signature.js`, `${cfg.srcJs}/restaurant_details.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`, `${cfg.srcJs}/lozad.js`])
     .pipe(concat('restaurant_details.js'))
     .pipe(uglify())
     .pipe(gulp.dest(cfg.tmpJs));
@@ -126,7 +126,7 @@ gulp.task('minify-details-prod', () => {
 // minify service worker code
 gulp.task('minify-sw-prod', () => {
   return gulp
-    .src([`${cfg.src}/sw.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`])
+    .src([`${cfg.srcJs}/global.js`, `${cfg.src}/sw.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`])
     .pipe(concat('sw.js'))
     .pipe(uglify())
     .pipe(gulp.dest(cfg.dest));
@@ -134,7 +134,7 @@ gulp.task('minify-sw-prod', () => {
 
 gulp.task('minify-sw-dev', () => {
   return gulp
-    .src([`${cfg.src}/sw.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`])
+    .src([`${cfg.srcJs}/global.js`, `${cfg.src}/sw.js`, `${cfg.srcJs}/dbhelper.js`, `${cfg.srcJs}/idb.js`])
     .pipe(concat('sw.js'))
     .pipe(gulp.dest(cfg.dest));
 });
@@ -155,7 +155,7 @@ gulp.task('dev-html', () => {
 });
 
 // html files (minify HTML files & inline css/js)
-gulp.task('inline-html', function() {
+gulp.task('inline-html', function () {
   return gulp
     .src(`${cfg.tmp}*.html`)
     .pipe(
@@ -186,7 +186,7 @@ gulp.task('clean-tmp', cb => {
 gulp.task('watch', () => {
   util.log(util.colors.bold(util.colors.cyan('[gulp-watch]'), util.colors.white('starting watch...')));
   // js
-  gulp.watch(`${cfg.srcJs}/*`, ['minify-list-dev', 'minify-details-dev']);
+  gulp.watch(`${cfg.srcJs}/*`, ['minify-list-dev', 'minify-details-dev', 'minify-sw-dev']);
   // css
   gulp.watch(cfg.srcCss, ['sass-dev']);
   // img
@@ -213,13 +213,12 @@ gulp.task('build-dev', seq('clean', ['root-files', 'lint', 'images', 'sass-dev',
  *  run localhost server
  */
 gulp.task('server', () => {
-  browserSync.init(
-    {
+  browserSync.init({
       server: cfg.dest,
       port: 8000,
       ui: false
     },
-    function(err, bs) {
+    function (err, bs) {
       bs.addMiddleware('*', gStatic, {
         override: true
       });
