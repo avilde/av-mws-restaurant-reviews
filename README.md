@@ -1,9 +1,15 @@
 # Mobile Web Specialist Certification Course
 #### _Three Stage Course Material Project - Restaurant Reviews_
 ---
-## Project Overview: Stage 2
+## Project Overview: Stage 3
 
-For the **Restaurant Reviews** projects, you will incrementally convert a static webpage to a mobile-ready web application. In **Stage One**, you will take a static design that lacks accessibility and convert the design to be responsive on different sized displays and accessible for screen reader use. You will also add a service worker to begin the process of creating a seamless offline experience for your users.
+### Tasks
+- Offline use of application (add review & sync when online)
+- User interface updates - favorite/unfavorite a restaurant
+- Results of audit should all now be over 90 points:
+    * **Progressive Web App: > 90**
+    * Performance: > 90
+    * Accessibility: > 90
 
 
 ## Code Owners
@@ -13,47 +19,63 @@ Initial:
 Modified: 
 * avilde <Andris Vilde 'vilde.andris@gmail.com'>
 
+My signature:
+* `av-rr`
+
 ## Notes For Reviewer
 
 * Restructured whole project into `public` and `src` (source) folders where automation tool `gulp` is used to generate resulting application.
 
-* For serving `public` folder I used `gulp-serve` instead of `python http.server` because when auditing page the python simple HTTP server tends to choke quite often.
+* Created 2 `gulp` configurations for development & testing - `prod` and `dev` code.
+
+* For serving public files I switched from `gulp-serve` to `browsersync` so I can add middleware `connect-gzip-static` to serve static pre-gzipped files from `public` directory.
 
 * To run `localhost` server with `public` directory files, type:
-```
-gulp serve
-```
-
-* To automatically build whole project & run server, type:
-```
-gulp build
+```js
+gulp server
 ```
 
-* Modifications done to files:
-    * `images` - converted images to .webp + added code to lazy load them
-    * `js` - concatenated, minified, uglified & generated source maps
-    * `html` - minified, inlined basic CSS
-    * `css` - using Sass pre-processor, minified
-    * `manifest` - created application icons
-    * `favicon` - created favorite icon for bookmarks
-    * `service worker` - minified code
-    * `gitignore` - added `node_modules` directory to be ignored
-    * `automation tools` - check `gulpfile.js` for whole configuration
+* To automatically build whole project, type:
+    * Product ready code (**`used for final tests`**)
+    ```js
+    gulp build-prod
+    ```
+    * Development ready code with `gulp-watch`
+    ```js
+    gulp build-dev
+    ```
+
+## Modifications
+done to project:
+* `images` - converted images to .webp + added code to lazy load them
+* `html`, `js` and `css` - minified, uglified, inlined and gzipped to resulting HTML files to improve load times
+* `manifest` - created application icons
+* `favicon` - created favorite icon for bookmarks
+* `service worker` - added code to only cache `GET` requests
+* `automation tools` - check `gulpfile.js` for whole configuration
+
+## Implemented
+
+* added `favorite buttons` for each restaurant in list & details view
+* created form controls to `post new review` to server
+* added `review validation` before posting
+* added `data sync` feature for `reviews` and `restaurants` modified/created in `offline` mode which will synchronize any `pending` data to server
+* added `accesibility` attributes to create review controls and favorite buttons
+* `google map` loading scripts replaced with `static maps` to drastically improve performance as it gave the biggest impact on performance:
+    * `restaurant details` - google map replaced with `static` google map integration to retrieve only image. Moved map bellow the fold and load it only when visible (used `IntersectionObserver`)
+    * `restaurant list` - to increase app performance replaced the google map with `responsive` image screenshots
+    * In both above cases when user clicks on static map it will only then load the real `interactive` map
+
 
 ## Lighthouse Results
->Notes: 
-> * results would have been way better if `Google Maps API` would use properly sized images & latest standarts like .webp, not to mention the time it blocks intereaction
-> * used 4 different audit configurations to test my page
-> * `restaurant.html` (restaurant details) page had similar results therefore have not created extra images and same goes for `Desktop` audit profiles
+For both pages all 3 criteria exceed **90** points.
 
-### 1) mobile - no throttling - clear storage 
-![](./results/mobile-no_throttling-clear_storage.png)
+`Restaurant list`
+* Progressive Web App: = 91
+* Performance: ~ 97
+* Accessibility: = 100
 
-### 2) mobile - no throttling - preserve storage
-![](./results/mobile-no_throttling-preserve_storage.png)
-
-### 3) mobile - slowdown - clear storage 
-![](./results/mobile-slowdown-clear_storage.png)
-
-### 4) mobile - slowdown - preserve storage 
-![](./results/mobile-no_throttling-preserve_storage.png)
+`Restaurant details`
+* Progressive Web App: = 91
+* Performance: ~ 94
+* Accessibility: = 94
