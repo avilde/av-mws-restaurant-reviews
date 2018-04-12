@@ -77,6 +77,8 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const favToggle = document.getElementById('favorite');
   if (stringToBoolean(restaurant.is_favorite)) favToggle.classList.add('is-favorite');
+  favToggle.tabIndex = '0';
+  favToggle.setAttribute('aria-label', `Favorite restaurant ${restaurant.name}`);
   favToggle.addEventListener('click', event => {
     favoriteRestaurant(event.target, restaurant);
   });

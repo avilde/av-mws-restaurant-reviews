@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
   fetchCuisines();
   updateRestaurants();
+  DBHelper.syncData();
 });
 
 /**
@@ -205,9 +206,11 @@ createRestaurantHTML = restaurant => {
   li.append(more);
 
   const favToggle = document.createElement('span');
-  favToggle.innerHTML = `&#x2605;`;
+  favToggle.innerHTML = '&#x2605;';
   favToggle.title = 'Favorite restaurant';
   favToggle.classList.add('favorite-restaurant');
+  favToggle.tabIndex = '0';
+  favToggle.setAttribute('aria-label', `Favorite restaurant ${restaurant.name}`);
   if (stringToBoolean(restaurant.is_favorite)) favToggle.classList.add('is-favorite');
   favToggle.addEventListener('click', event => {
     favoriteRestaurant(event.target, restaurant);

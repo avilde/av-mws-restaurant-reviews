@@ -47,6 +47,8 @@ class DBHelper {
         keyPath: 'id',
         autoIncrement: true
       });
+      // values for pendingUpdate 'yes', 'no' are used instead of boolean because IndexedDb doesn't support index on boolean column
+      // due to many possible 'falsy' values
       storeRestaurants.createIndex('pending-updates', 'pendingUpdate', {
         unique: false
       });
@@ -318,19 +320,27 @@ class DBHelper {
       })
       .then(resp => {
         if (resp.status != 200) console.info(`[${APP_NAME}] response was not successful. Response: ${resp}`);
+        restaurant.pendingUpdate = 'no';
       })
       .catch(e => {
         d(`put request failed. Could not ${state ? 'favorite' : 'unfavorite'} restaurant '${restaurant.id}'. Error: ${e}`);
         restaurant.pendingUpdate = 'yes';
       });
 
-    // update idb record
+    DBHelper.updateRestaurantInDb(restaurant);
+  }
+
+  /**
+   * Update idb restaurant record
+   * @param {*} restaurant
+   * @param {Function} callback - callback function, *optional
+   */
+  static updateRestaurantInDb(restaurant, callback) {
+    d('updating restaurant', restaurant);
     DBHelper.getDb().then(db => {
       if (!db) return;
-
-      const store = db.transaction(DBHelper.STORE_RESTAURANTS, 'readwrite').objectStore(DBHelper.STORE_RESTAURANTS);
-
-      store.put(restaurant);
+      db.transaction(DBHelper.STORE_RESTAURANTS, 'readwrite').objectStore(DBHelper.STORE_RESTAURANTS).put(restaurant);
+      if (typeof callback === 'function') callback();
     });
   }
 
@@ -425,16 +435,26 @@ class DBHelper {
    */
   static syncData() {
     // restaurants
-    DBHelper.fetchRestaurants((error, restaurants) => {
-      let pendingRestaurants = restaurants.filter(r => r.pendingUpdate === 'yes');
+    DBHelper.getDb()
+      .then(db => {
+        if (!db) return;
 
-      pendingRestaurants.forEach((restaurant, idx) => {
+        return db
+          .transaction(DBHelper.STORE_RESTAURANTS)
+          .objectStore(DBHelper.STORE_RESTAURANTS)
+          .index('pending-updates').openCursor('yes');
+      })
+      .then(function iterateCursor(cursor) {
+        if (!cursor) return;
+
+        let restaurant = cursor.value;
+        restaurant.pendingUpdate = 'no';
         DBHelper.favoriteRestaurant(restaurant, restaurant.is_favorite);
-        // TODO: set pending flag false
-      });
-    });
 
-    //reviews
+        return cursor.continue().then(iterateCursor);
+      });
+
+    // reviews
     DBHelper.getDb()
       .then(db => {
         if (!db) return;
@@ -454,7 +474,7 @@ class DBHelper {
           DBHelper.insertReview(review);
         });
 
-        return cursor.continue().then(iterateCursor)
+        return cursor.continue().then(iterateCursor);
       });
   }
 }
