@@ -20,7 +20,6 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   drawRestaurant();
   addRatingHandler();
-  // DBHelper.syncData();
 });
 
 /**
