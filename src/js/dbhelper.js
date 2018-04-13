@@ -332,11 +332,10 @@ class DBHelper {
 
   /**
    * Update idb restaurant record
-   * @param {*} restaurant
+   * @param {Object} restaurant
    * @param {Function} callback - callback function, *optional
    */
   static updateRestaurantInDb(restaurant, callback) {
-    d('updating restaurant', restaurant);
     DBHelper.getDb().then(db => {
       if (!db) return;
       db.transaction(DBHelper.STORE_RESTAURANTS, 'readwrite').objectStore(DBHelper.STORE_RESTAURANTS).put(restaurant);
@@ -366,7 +365,6 @@ class DBHelper {
         return resp.json();
       })
       .then(rev => {
-        d('record from server', rev.id);
         // tranform review before insert
         if (!rev.hasOwnProperty('pendingUpdate'))
           rev.pendingUpdate = 'no';

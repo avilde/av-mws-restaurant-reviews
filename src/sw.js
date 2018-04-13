@@ -84,3 +84,9 @@ self.addEventListener('fetch', event => {
     );
   }
 });
+
+self.addEventListener('sync', event => {
+  // synchronize offline data with server
+  if (event.tag === 'syncUp')
+    event.waitUntil(DBHelper.syncData());
+});

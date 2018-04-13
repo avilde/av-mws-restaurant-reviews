@@ -7,6 +7,11 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', {
     scope: './'
   });
+
+  // request syncup
+  navigator.serviceWorker.ready.then(swRegistration => {
+    return swRegistration.sync.register('syncUp');
+  });
 }
 
 /**
@@ -15,7 +20,7 @@ if ('serviceWorker' in navigator) {
 document.addEventListener('DOMContentLoaded', event => {
   drawRestaurant();
   addRatingHandler();
-  DBHelper.syncData();
+  // DBHelper.syncData();
 });
 
 /**

@@ -11,7 +11,7 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', {
     scope: './'
   });
-
+  // request syncup
   navigator.serviceWorker.ready.then(swRegistration => {
     return swRegistration.sync.register('syncUp');
   });
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', event => {
   fetchNeighborhoods();
   fetchCuisines();
   updateRestaurants();
-  DBHelper.syncData();
+  // DBHelper.syncData();
 });
 
 /**

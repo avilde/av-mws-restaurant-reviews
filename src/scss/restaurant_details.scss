@@ -85,6 +85,10 @@ h6 {
   margin: 0 0 20px;
 }
 
+h3 {
+  color: $base-color;
+}
+
 article,
 aside,
 canvas,
@@ -444,13 +448,13 @@ div.new-review-container {
   margin: 5px 10px;
 }
 
-.new-review-container h3 {
+.new-review-container h4 {
   background: $base-color;
   color: white;
   padding-left: 10px;
 }
 
-.new-review-container h4 {
+.new-review-container h5 {
   color: $base-color;
   margin: 0;
   margin-right: 10px;
@@ -570,10 +574,10 @@ div.my-review-msg.success {
   #restaurant-hours td {
     font-size: 16px;
   }
-  .new-review-container h3 {
+  .new-review-container h4 {
     font-size: 22px;
   }
-  .new-review-container h4 {
+  .new-review-container h5 {
     font-size: 20px;
   }
   .new-review-container .my-name,
