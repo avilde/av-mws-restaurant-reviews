@@ -1,7 +1,7 @@
 # Mobile Web Specialist Certification Course
 #### _Three Stage Course Material Project - Restaurant Reviews_
 ---
-## Project Overview: Stage 3
+## Project Overview
 
 ### Tasks
 - Offline use of application (add review & sync when online)
