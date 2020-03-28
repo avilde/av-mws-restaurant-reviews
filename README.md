@@ -2,6 +2,7 @@
 #### _Three Stage Course Material Project - Restaurant Reviews_
 ---
 ## Project Overview
+![Restaurant Reviews Cover](./av-restaurant-reviews.png "Restaurant Reviews Cover")
 
 ### Tasks
 - Offline use of application (add review & sync when online)
