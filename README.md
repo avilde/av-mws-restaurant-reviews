@@ -12,17 +12,6 @@
     * Performance: > 90
     * Accessibility: > 90
 
-
-## Code Owners
-Initial:
-* @forbiddenvoid @richardkalehoff @asparr
-
-Modified: 
-* avilde <Andris Vilde 'vilde.andris@gmail.com'>
-
-My signature:
-* `av-rr`
-
 ## Notes For Reviewer
 
 * Restructured whole project into `public` and `src` (source) folders where automation tool `gulp` is used to generate resulting application.
